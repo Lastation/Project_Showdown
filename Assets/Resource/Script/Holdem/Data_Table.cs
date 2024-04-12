@@ -2,6 +2,7 @@
 using TMPro;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.Playables;
 using VRC.SDKBase;
 using VRC.Udon.Common.Interfaces;
 
@@ -31,11 +32,15 @@ namespace Holdem
         #region Sync Varialbes
         [UdonSynced] TableState tableState;
         [UdonSynced] PlayerState[] playerState = new PlayerState[9];
-        Data_Player[] data_player = new Data_Player[9];
+        [UdonSynced] int tableTotalPot = 0;
+        [UdonSynced] int tableCallSize = 0;
+        [UdonSynced] int[] playerBetSize = new int[9];
         #endregion
 
         [SerializeField]
         TextMeshPro[] text_playerState;
+
+        Data_Player[] data_player = new Data_Player[9];
 
         #region Sync
         public void Start()
@@ -43,11 +48,11 @@ namespace Holdem
             if (!Networking.IsOwner(gameObject))
                 SendCustomNetworkEvent(NetworkEventTarget.Owner, nameof(DoSync));
         }
-
         public void Update()
         {
             if (!Networking.IsOwner(gameObject))
                 return;
+
 
             if (Input.GetKeyDown(KeyCode.Q))
             {
@@ -55,7 +60,6 @@ namespace Holdem
                 UpdateUI();
             }
         }
-
         public void DoSync()
         {
             RequestSerialization();
@@ -70,12 +74,10 @@ namespace Holdem
         {
 
             for (int i = 0; i < text_playerState.Length; i++)
-            {
-                PlayerState state = playerState[i];
-                text_playerState[i].text = $"{state}";
-            }
+                text_playerState[i].text = $"{playerState[i]}";
         }
 
+        #region State Setting
         public void Set_TableState(TableState state)
         {
             tableState = state;
@@ -86,10 +88,44 @@ namespace Holdem
             playerState[idx] = state;
             DoSync();
         }
-        public void Set_PlayerData(int idx,  Data_Player data)
+        #endregion
+
+        #region Chip Setting
+        public void Set_TableTotalPot(int value)
+        {
+            tableTotalPot = value;
+            DoSync();
+        }
+        public void Set_TableCallSize(int value)
+        {
+            tableCallSize = value;
+            DoSync();
+        }
+        public void Set_PlayerBetSize(int idx, int value)
+        {
+            playerBetSize[idx] = value;
+            DoSync();
+        }
+        #endregion
+
+        public void Set_PlayerData(int idx, Data_Player data)
         {
             data_player[idx] = data;
             DoSync();
+        }
+
+        public override void OnPlayerLeft(VRCPlayerApi player)
+        {
+            if (!Networking.IsOwner(gameObject)) return;
+
+            for (int i = 0; i < playerState.Length; i++)
+            {
+                if (!Networking.IsOwner(player, data_player[i].gameObject))
+                    continue;
+                Set_PlayerState(i, PlayerState.Fold);
+            }
+
+            UpdateUI();
         }
     }
 }
