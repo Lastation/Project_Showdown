@@ -1,4 +1,4 @@
-﻿
+﻿using Holdem;
 using System;
 using UdonSharp;
 using UnityEngine;
@@ -13,10 +13,22 @@ public enum handMenuIndex : int
     Language = 4,
     Back = 5,
     Card = 6,
+    DirectionalLight = 7,
+    AvatarLight = 8,
+}
+
+public enum SE_Table_Index : int
+{
+    DrawCard = 0,
+    Call = 1,
+    Check = 2,
+    Raise = 3,
+    Fold = 4
 }
 
 public class MainSystem : UdonSharpBehaviour
 {
+    #region Localization
     [SerializeField]
     Localization localization;
 
@@ -29,7 +41,7 @@ public class MainSystem : UdonSharpBehaviour
     public void Set_Language_JP() => Update_Language(LocalizationType.JP);
     public void Set_Language_ENG() => Update_Language(LocalizationType.ENG);
 
-    private void Awake() => Update_Language(LocalizationType.KOR);
+    private void Start() => Update_Language(LocalizationType.KOR);
 
     public void Update_Language(LocalizationType type)
     {
@@ -42,6 +54,8 @@ public class MainSystem : UdonSharpBehaviour
         text_handMenu_Button[(int)handMenuIndex.Language].text = localization.s_Language[(int)localizationType];
         text_handMenu_Button[(int)handMenuIndex.Back].text = localization.s_Back[(int)localizationType];
         text_handMenu_Button[(int)handMenuIndex.Card].text = localization.s_Card[(int)localizationType];
+        text_handMenu_Button[(int)handMenuIndex.DirectionalLight].text = localization.s_DirectionalLight[(int)localizationType];
+        text_handMenu_Button[(int)handMenuIndex.AvatarLight].text = localization.s_AvatarLight[(int)localizationType];
     }
 
     public string s_MenuHandle_tipText_VR => localization.s_MenuHandle_tipText_VR[(int)localizationType];
@@ -63,4 +77,47 @@ public class MainSystem : UdonSharpBehaviour
                 return null;
         }
     }
+    public string s_DirectionalLight => localization.s_DirectionalLight[(int)localizationType];
+    public string s_AvatarLight => localization.s_AvatarLight[(int)localizationType];
+    #endregion
+
+    [SerializeField]
+    Data_Player data_Player;
+
+    public Data_Player Get_Data_Player() => data_Player;
+
+    #region Sound Effect
+    [SerializeField]
+    AudioClip[] audioClip_Table;
+    public AudioClip Get_AudioClip_Table(int index) => audioClip_Table[index];
+    #endregion
+
+    #region Color
+    [SerializeField]
+    Color color_Table_Card_Frame;
+    [SerializeField]
+    Slider slider_Table_Card_Frame;
+    [SerializeField]
+    Text text_Table_Card_Frame;
+    [SerializeField]
+    Image Image_Table_Card_Frame;
+
+    public void Set_Color_Card_Frame()
+    {
+        int value = (int)slider_Table_Card_Frame.value > 16777215 ? 16777215 : (int)slider_Table_Card_Frame.value;
+        string hexCode = $"#{value.ToString("X")}";
+        text_Table_Card_Frame.text = hexCode;
+        color_Table_Card_Frame = ConvertHexToRGB(hexCode);
+        Image_Table_Card_Frame.color = color_Table_Card_Frame;
+    }
+
+    public Color ConvertHexToRGB(string hexValue)
+    {
+        int hexColor = Convert.ToInt32(hexValue.Replace("#", ""), 16);
+        int red = (hexColor >> 16) & 0xFF;
+        int green = (hexColor >> 8) & 0xFF;
+        int blue = hexColor & 0xFF;
+        return new Color(red / 255.0f, green / 255.0f, blue / 255.0f);
+    }
+    #endregion
 }

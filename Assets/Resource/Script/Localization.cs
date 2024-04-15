@@ -26,19 +26,19 @@ public class Localization : UdonSharpBehaviour
     {
         "시간",
         "時間",
-        "H"
+        "Hour"
     };
     [ReadOnly] public string[] s_Minute = new string[3]
     {
         "분",
         "分",
-        "M"
+        "Min"
     };
     [ReadOnly] public string[] s_Before = new string[3]
     {
-        "전",
+        " 전",
         "前",
-        "before"
+        " ago"
     };
 
     [ReadOnly] public string[] s_DayOfWeek_KOR = new string[7]
@@ -96,5 +96,18 @@ public class Localization : UdonSharpBehaviour
         "카드설정",
         "カード設定",
         "Card settings"
+    };
+
+    [ReadOnly] public string[] s_DirectionalLight = new string[3]
+    {
+        "디렉셔널 라이트",
+        "ディレクショナルライト",
+        "Directional light"
+    };
+    [ReadOnly] public string[] s_AvatarLight = new string[3]
+    {
+        "아바타 라이트",
+        "アバターライト",
+        "Avatar Light"
     };
 }
