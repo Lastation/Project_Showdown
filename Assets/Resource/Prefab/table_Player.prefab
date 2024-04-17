@@ -1013,6 +1013,7 @@ MonoBehaviour:
   text_TablePlayerChip: {fileID: 6547310111714713078}
   text_call: {fileID: 4676310060150716857}
   text_raise: {fileID: 3735481503833168077}
+  text_state: {fileID: 7458245671389518329}
   obj_TablePlayerUI: {fileID: 4689263293257477041}
   obj_TableJoin: {fileID: 7244516413957814334}
   obj_TableExit: {fileID: 2273517899368403630}
@@ -4174,7 +4175,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 20, y: 180, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0.72}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0.2, y: 0.262}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &7630469674009841389
@@ -4687,7 +4688,7 @@ GameObject:
   - component: {fileID: 5062818460716638437}
   - component: {fileID: 7458245671389518329}
   m_Layer: 0
-  m_Name: text_playerState
+  m_Name: text_state
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4709,7 +4710,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 30, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0.8}
+  m_AnchoredPosition: {x: 0, y: 0.1}
   m_SizeDelta: {x: 0.2, y: 0.05}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &5062818460716638437

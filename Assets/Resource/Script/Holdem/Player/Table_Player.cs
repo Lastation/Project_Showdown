@@ -1,5 +1,7 @@
-﻿using UdonSharp;
+﻿using System.Runtime.Remoting.Messaging;
+using UdonSharp;
 using UnityEngine;
+using UnityEngine.Playables;
 using VRC.SDKBase;
 
 namespace Holdem
@@ -13,6 +15,7 @@ namespace Holdem
         
         [UdonSynced] int actionChipSize = 0;
         [UdonSynced] string displayName = "";
+        [UdonSynced] int playerId = 0;
         [UdonSynced] int tablePlayerChip = 0;
         [UdonSynced] bool isAction = false;
 
@@ -23,7 +26,6 @@ namespace Holdem
         public void DoSync() => RequestSerialization();
         public override void OnDeserialization()
         {
-            Debug.Log(displayName);
             Update_DisplayText();
             Update_Action();
         }
@@ -41,11 +43,6 @@ namespace Holdem
 
             data_Table.Set_Action(tableNumber, actionChipSize);
         }
-        public override void OnPlayerLeft(VRCPlayerApi player)
-        {
-            if (!Networking.IsOwner(gameObject)) return;
-            DoSync();
-        }
         #endregion
 
         #region Enter & Exit
@@ -61,6 +58,7 @@ namespace Holdem
             table_Player_UI.Set_Owner(Networking.LocalPlayer);
 
             displayName = Networking.LocalPlayer.displayName;
+            playerId = Networking.LocalPlayer.playerId;
             tablePlayerChip = mainSystem.Get_Data_Player().Get_Chip();
             mainSystem.Get_Data_Player().Set_isPlayGame(true);
 
@@ -71,6 +69,7 @@ namespace Holdem
         public void Exit_Table()
         {
             displayName = "";
+            playerId = 0;
             tablePlayerChip = 0;
             mainSystem.Get_Data_Player().Set_isPlayGame(false);
             table_Player_UI.Set_TablePlayerUI(false);
@@ -154,5 +153,25 @@ namespace Holdem
             DoSync();
         }
         #endregion
+
+        public bool isPlaying() => displayName == "" ? false : true;
+        public Table_Player_UI Get_table_Player_UI() => table_Player_UI;
+        public string Get_DisplayName() => displayName;
+
+        public override void OnPlayerJoined(VRCPlayerApi player)
+        {
+            if (!Networking.IsOwner(gameObject)) return;
+            DoSync();
+        }
+
+        public override void OnPlayerLeft(VRCPlayerApi player)
+        {
+            if (!Networking.IsOwner(gameObject)) return;
+            if (player.playerId != playerId) return;
+            displayName = "";
+            playerId = 0;
+            Update_DisplayText();
+            DoSync();
+        }
     }
 }

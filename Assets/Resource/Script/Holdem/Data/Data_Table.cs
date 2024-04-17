@@ -38,9 +38,7 @@ namespace Holdem
 
         [SerializeField] MainSystem mainSystem;
         [SerializeField] AudioSource audioSource;
-        [SerializeField] TextMeshPro[] text_playerState;
-
-        Data_Player[] data_player = new Data_Player[9];
+        [SerializeField] Table_Player[] table_Players;
 
         #region Sync
         public void Start()
@@ -68,8 +66,7 @@ namespace Holdem
 
         public void Update_UI()
         {
-            for (int i = 0; i < text_playerState.Length; i++)
-                text_playerState[i].text = $"{playerState[i]}";
+            Update_PlayerState();
         }
 
         #region State Setting
@@ -78,10 +75,25 @@ namespace Holdem
             tableState = state;
             DoSync();
         }
+
         public void Set_PlayerState(int idx, PlayerState state)
         {
             playerState[idx] = state;
             DoSync();
+        }
+        public void Reset_PlayerState(int index)
+        {
+            if (!Networking.IsOwner(gameObject))
+                return;
+
+            playerState[index] = PlayerState.OutOfGame;
+            Update_UI();
+            DoSync();
+        }
+        public void Update_PlayerState()
+        {
+            for (int i = 0; i < table_Players.Length; i++)
+                table_Players[i].Get_table_Player_UI().Update_StateText(playerState[i]);
         }
         #endregion
 
@@ -124,23 +136,32 @@ namespace Holdem
         }
         #endregion
 
-        public void Set_PlayerData(int idx, Data_Player data)
+        public void Set_TablePlayerData(int idx, Table_Player data)
         {
-            data_player[idx] = data;
+            table_Players[idx] = data;
             DoSync();
         }
+        public Table_Player Get_TablePlayerData(int idx) => table_Players[idx];
+        public override void OnPlayerJoined(VRCPlayerApi player)
+        {
+            if (!Networking.IsOwner(gameObject)) return;
+            Update_UI();
+            DoSync();
+        }
+
         public override void OnPlayerLeft(VRCPlayerApi player)
         {
             if (!Networking.IsOwner(gameObject)) return;
-
             for (int i = 0; i < playerState.Length; i++)
             {
-                if (!Networking.IsOwner(player, data_player[i].gameObject))
-                    continue;
-                Set_PlayerState(i, PlayerState.Fold);
+                if (Get_TablePlayerData(i).Get_DisplayName() == player.displayName)
+                {
+                    playerState[i] = PlayerState.OutOfGame;
+                    break;
+                }
             }
-            DoSync();
             Update_UI();
+            DoSync();
         }
     }
 }

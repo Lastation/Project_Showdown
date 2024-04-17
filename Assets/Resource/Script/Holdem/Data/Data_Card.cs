@@ -9,51 +9,41 @@ namespace Holdem
 {
     public class Data_Card : UdonSharpBehaviour
     {
-        [SerializeField]
-        VRCPickup vrcPickup;
+        [SerializeField] VRCPickup vrcPickup;
+        [SerializeField] SpriteRenderer sr_pattern;
 
-        [SerializeField]
-        SpriteRenderer spriteRenderer;
+        [UdonSynced] bool isBlind = true;
 
-        [SerializeField]
-        Color color_frame, color_pattern;
+        int i_cardIndex = 0;
+        Sprite sprite = null;
 
-        [UdonSynced]
-        bool isBlind = true;
-        int i_cardIndex;
-
-        public void Start()
-        {
-            Set_Pickupable(false);
-        }
-
+        public void Start() => Set_Pickupable(false);
         public void DoSync() => RequestSerialization();
         public override void OnDeserialization()
         {
             Update_Blind(isBlind);
         }
 
-        public void Update_Blind(bool value)
+        public void Update_Blind(bool value) => sr_pattern.sprite = value ? null : sprite;
+        public void Set_Card_Pattern(Sprite value)
         {
-            spriteRenderer.color = value ? color_pattern : Color.clear;
+            sr_pattern.sprite = value;
+            sprite = value;
         }
 
         public void Set_CardIndex(int value) => i_cardIndex = value;
         public int Get_CardIndex() => i_cardIndex;
 
         public void Set_Pickupable(bool value) => vrcPickup.pickupable = value;
-
         public void Set_Owner(VRCPlayerApi value)
         {
             Networking.SetOwner(value, gameObject);
         }
-
         public void Set_Blind(bool value)
         {
             isBlind = value;
             DoSync();
         }
-
         public override void OnPlayerJoined(VRCPlayerApi player)
         {
             if (!Networking.IsOwner(gameObject)) return;
