@@ -35,10 +35,6 @@ namespace Holdem
         public int Get_CardIndex() => i_cardIndex;
 
         public void Set_Pickupable(bool value) => vrcPickup.pickupable = value;
-        public void Set_Owner(VRCPlayerApi value)
-        {
-            Networking.SetOwner(value, gameObject);
-        }
         public void Set_Blind(bool value)
         {
             isBlind = value;
@@ -48,6 +44,11 @@ namespace Holdem
         {
             if (!Networking.IsOwner(gameObject)) return;
             DoSync();
+        }
+        public void Set_Owner(VRCPlayerApi value)
+        {
+            if (value.IsOwner(gameObject)) return;
+            Networking.SetOwner(value, gameObject);
         }
     }
 }

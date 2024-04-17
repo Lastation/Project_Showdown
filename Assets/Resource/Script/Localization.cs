@@ -110,4 +110,17 @@ public class Localization : UdonSharpBehaviour
         "アバターライト",
         "Avatar Light"
     };
+
+    [ReadOnly] public string[] s_TableState_progress = new string[3]
+    {
+        "게임 진행중!",
+        "ゲーム進行中",
+        "In progress"
+    };
+    [ReadOnly] public string[] s_TableState_wait = new string[3]
+    {
+        "게임 시작 대기중! 남은자리",
+        "ゲーム開始待機中！残った席",
+        "Waiting to start the game! Remaining seats"
+    };
 }

@@ -19,21 +19,16 @@ namespace Holdem
 
         Color color_button = new Color(0.0627451f, 0.509804f, 1, 1);
         string[] s_playerState = new string[5] { "OutOfGame", "Wait", "Turn", "Call", "Fold" };
+        bool isPlayer = false;
 
-        public void Update_DisplayText(string displayName, int tablePlayerChip)
+        public void Update_UI(string displayName, int tablePlayerChip)
         {
+            isPlayer = displayName == "" ? false : true;
             text_DisplayName.text = displayName == "" ? "Join" : displayName;
             text_TablePlayerChip.text = displayName == "" ? "" : tablePlayerChip.ToString();
         }
-        public void Update_StateText(PlayerState playerState)
-        {
-            text_state.text = text_TablePlayerChip.text == "" ? "" : $"{s_playerState[(int)playerState]}";
-        }
 
-        public void Set_Owner(VRCPlayerApi value)
-        {
-            Networking.SetOwner(value, gameObject);
-        }
+        public void Set_StateText(PlayerState playerState)=> text_state.text = isPlayer ? $"{s_playerState[(int)playerState]}" : "";
 
         public void Set_TablePlayerUI(bool value)
         {
@@ -41,7 +36,6 @@ namespace Holdem
             obj_TableExit.SetActive(value);
             obj_TablePlayerUI.SetActive(value);
         }
-
         public void Set_Button_Color(bool isTurn)
         {
             for (int i = 0; i <  img_button.Length; i++)
@@ -54,5 +48,10 @@ namespace Holdem
         public void Set_RaiseText(int value) => text_raise.text = $"raise [ {value} ]";
         public void Set_RaiseText_Allin(int value) => text_raise.text = $"all in [ { value } ]";
 
+        public void Set_Owner(VRCPlayerApi value)
+        {
+            if (value.IsOwner(gameObject)) return;
+            Networking.SetOwner(value, gameObject);
+        }
     }
 }

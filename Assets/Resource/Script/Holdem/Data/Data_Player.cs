@@ -5,11 +5,20 @@ using UnityEngine.UI;
 
 namespace Holdem
 {
+    public enum CardPatternType : int
+    {
+        Basic = 0,
+        Simple = 1,
+    }
+
     public class Data_Player : UdonSharpBehaviour
     {
         int chip = 10000;
+        CardPatternType cardPatternType = CardPatternType.Basic;
+
         [SerializeField] Text text_chip;
 
+        Table_Card table_Card;
         bool isPlayGame = false;
 
         public void DoSync() => RequestSerialization();
@@ -42,5 +51,8 @@ namespace Holdem
             isPlayGame = value;
             DoSync();
         }
+
+        public void Set_cardPatternType(CardPatternType value) => cardPatternType = value;
+        public CardPatternType Get_cardPatternType() => cardPatternType;
     }
 }

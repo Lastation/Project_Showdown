@@ -79,6 +79,8 @@ public class MainSystem : UdonSharpBehaviour
     }
     public string s_DirectionalLight => localization.s_DirectionalLight[(int)localizationType];
     public string s_AvatarLight => localization.s_AvatarLight[(int)localizationType];
+    public string s_TableState_progress => localization.s_TableState_progress[(int)localizationType];
+    public string s_TableState_wait => localization.s_TableState_wait[(int)localizationType];
     #endregion
 
     [SerializeField]
@@ -90,60 +92,5 @@ public class MainSystem : UdonSharpBehaviour
     [SerializeField]
     AudioClip[] audioClip_Table;
     public AudioClip Get_AudioClip_Table(int index) => audioClip_Table[index];
-    #endregion
-
-    #region Color
-    [SerializeField]
-    Color color_Table_Card_Frame;
-    [SerializeField]
-    Slider slider_Table_Card_Frame;
-    [SerializeField]
-    Text text_Table_Card_Frame;
-    [SerializeField]
-    Image Image_Table_Card_Frame;
-
-    [SerializeField]
-    Material mat_Table_Card_Frame;
-
-    public void Set_Color_Card_Frame()
-    {
-        int value = (int)slider_Table_Card_Frame.value > 16777215 ? 16777215 : (int)slider_Table_Card_Frame.value;
-        string hexCode = $"#{value.ToString("X")}";
-        text_Table_Card_Frame.text = hexCode;
-        color_Table_Card_Frame = ConvertHexToRGB(hexCode);
-        Image_Table_Card_Frame.color = color_Table_Card_Frame;
-        mat_Table_Card_Frame.SetColor("_Color", color_Table_Card_Frame);
-    }
-
-    [SerializeField]
-    Color color_Table_Card_Pattern;
-    [SerializeField]
-    Slider slider_Table_Card_Pattern;
-    [SerializeField]
-    Text text_Table_Card_Pattern;
-    [SerializeField]
-    Image Image_Table_Card_Pattern;
-
-    [SerializeField]
-    Material mat_Table_Card_Pattern;
-
-    public void Set_Color_Card_Pattern()
-    {
-        int value = (int)slider_Table_Card_Pattern.value > 16777215 ? 16777215 : (int)slider_Table_Card_Pattern.value;
-        string hexCode = $"#{value.ToString("X")}";
-        text_Table_Card_Pattern.text = hexCode;
-        color_Table_Card_Pattern = ConvertHexToRGB(hexCode);
-        Image_Table_Card_Pattern.color = color_Table_Card_Pattern;
-        mat_Table_Card_Pattern.SetColor("_Color", color_Table_Card_Pattern);
-    }
-
-    public Color ConvertHexToRGB(string hexValue)
-    {
-        int hexColor = Convert.ToInt32(hexValue.Replace("#", ""), 16);
-        int red = (hexColor >> 16) & 0xFF;
-        int green = (hexColor >> 8) & 0xFF;
-        int blue = hexColor & 0xFF;
-        return new Color(red / 255.0f, green / 255.0f, blue / 255.0f);
-    }
     #endregion
 }

@@ -1,4 +1,5 @@
-﻿using System.Runtime.Remoting.Messaging;
+﻿using System.Data;
+using System.Runtime.Remoting.Messaging;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Playables;
@@ -10,7 +11,7 @@ namespace Holdem
     {
         [SerializeField] int tableNumber = 0;
         [SerializeField] MainSystem mainSystem = default;
-        [SerializeField] Data_Table data_Table = default;
+        [SerializeField] Table_System table_System = default;
         [SerializeField] Table_Player_UI table_Player_UI = default;
         
         [UdonSynced] int actionChipSize = 0;
@@ -28,20 +29,30 @@ namespace Holdem
         {
             Update_DisplayText();
             Update_Action();
+            Update_Table();
         }
         public void Update_DisplayText()
         {
-            table_Player_UI.Update_DisplayText(displayName, tablePlayerChip);
+            table_Player_UI.Update_UI(displayName, tablePlayerChip);
+            table_System.Update_PlayerState();
         }
         public void Update_Action()
         {
             if (!isAction)
                 return;
 
-            if (!Networking.LocalPlayer.IsOwner(data_Table.gameObject))
+            if (!Networking.IsOwner(table_System.gameObject))
                 return;
 
-            data_Table.Set_Action(tableNumber, actionChipSize);
+            table_System.Set_BetAction(tableNumber, actionChipSize);
+        }
+        public void Update_Table()
+        {
+            if (Networking.IsOwner(table_System.gameObject))
+            {
+                table_System.Update_UI();
+                table_System.DoSync();
+            }
         }
         #endregion
 
@@ -54,14 +65,13 @@ namespace Holdem
             if (mainSystem.Get_Data_Player().Get_isPlayGame())
                 return;
 
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            Set_Owner(Networking.LocalPlayer);
             table_Player_UI.Set_Owner(Networking.LocalPlayer);
 
             displayName = Networking.LocalPlayer.displayName;
             playerId = Networking.LocalPlayer.playerId;
             tablePlayerChip = mainSystem.Get_Data_Player().Get_Chip();
             mainSystem.Get_Data_Player().Set_isPlayGame(true);
-
             table_Player_UI.Set_TablePlayerUI(true);
             Update_DisplayText();
             DoSync();
@@ -90,7 +100,7 @@ namespace Holdem
             if (!isTurn)
                 return;
 
-            Action_Sync(data_Table.Get_TableCallSize());
+            Action_Sync(table_System.Get_TableCallSize());
         }
         public void Action_Raise()
         {
@@ -122,9 +132,9 @@ namespace Holdem
         #endregion
 
         #region Raise
-        public void Add_RaiseChipSize_Reset() => Set_RaiseChipSize(data_Table.Get_TableCallSize() * 1, false);
-        public void Add_RaiseChipSize_3x() => Set_RaiseChipSize(data_Table.Get_TableCallSize() * 2, false);
-        public void Add_RaiseChipSize_4x() => Set_RaiseChipSize(data_Table.Get_TableCallSize() * 3, false);
+        public void Add_RaiseChipSize_Reset() => Set_RaiseChipSize(table_System.Get_TableCallSize() * 1, false);
+        public void Add_RaiseChipSize_3x() => Set_RaiseChipSize(table_System.Get_TableCallSize() * 2, false);
+        public void Add_RaiseChipSize_4x() => Set_RaiseChipSize(table_System.Get_TableCallSize() * 3, false);
 
         public void Add_RaiseChipSize_100() => Set_RaiseChipSize(100, true);
         public void Add_RaiseChipSize_500() => Set_RaiseChipSize(500, true);
@@ -142,7 +152,7 @@ namespace Holdem
             if (isAdd)
                 actionChipSize += value;
             else
-                actionChipSize = data_Table.Get_TableCallSize() + value;
+                actionChipSize = table_System.Get_TableCallSize() + value;
 
             actionChipSize = Mathf.Min(actionChipSize, mainSystem.Get_Data_Player().Get_Chip());
 
@@ -163,7 +173,6 @@ namespace Holdem
             if (!Networking.IsOwner(gameObject)) return;
             DoSync();
         }
-
         public override void OnPlayerLeft(VRCPlayerApi player)
         {
             if (!Networking.IsOwner(gameObject)) return;
@@ -172,6 +181,11 @@ namespace Holdem
             playerId = 0;
             Update_DisplayText();
             DoSync();
+        }
+        public void Set_Owner(VRCPlayerApi value)
+        {
+            if (value.IsOwner(gameObject)) return;
+            Networking.SetOwner(value, gameObject);
         }
     }
 }
