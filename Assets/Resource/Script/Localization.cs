@@ -123,4 +123,53 @@ public class Localization : UdonSharpBehaviour
         "ゲーム開始待機中！残った席",
         "Waiting to start the game! Remaining seats"
     };
+
+    [ReadOnly] public string[] s_HankRank_KOR = new string[13]
+    {
+        "하이카드",
+        "원 페어",
+        "투 페어",
+        "트리플",
+        "스트레이트",
+        "백스트레이트",
+        "마운틴",
+        "플러쉬",
+        "풀하우스",
+        "포카드",
+        "스트레이트 플러쉬",
+        "백 스트레이트 플러쉬",
+        "로얄 스트레이트 플러쉬"
+    };
+    [ReadOnly] public string[] s_HankRank_JP = new string[13]
+    {
+        "ハイカード",
+        "ワンペア",
+        "ツーペア",
+        "スリーカード",
+        "ストレート",
+        "ファイブ ロー",
+        "ストレート",
+        "フラッシュ",
+        "フルハウス",
+        "フォーカード",
+        "ストレートフラッシュ",
+        "ストレートフラッシュ",
+        "ロイヤルストレートフラッシュ"
+    };
+    [ReadOnly] public string[] s_HankRank_ENG = new string[13]
+    {
+        "High card",
+        "One pair",
+        "Two pair",
+        "Three of a kind",
+        "Straight",
+        "Back Straight",
+        "Mountain",
+        "Flush",
+        "Full house",
+        "Four of a kind",
+        "Straight flush",
+        "Back Straight Flush",
+        "Royal flush"
+    };
 }

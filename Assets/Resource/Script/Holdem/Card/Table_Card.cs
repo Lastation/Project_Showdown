@@ -11,7 +11,7 @@ namespace Holdem
         Flop2 = 2,
         Flop3 = 3,
         Turn = 4,
-        River = 5
+        River = 5,
     }
 
     public class Table_Card : UdonSharpBehaviour
@@ -96,12 +96,22 @@ namespace Holdem
                 data_Card[i].Set_Card_Pattern(patterns[i]);
             }
         }
+        public void Set_CardPosition(int index, Transform cardPosition, bool isBlind)
+        {
+            data_Card[shuffleIndex[index]].transform.position = cardPosition.position;
+            data_Card[shuffleIndex[index]].transform.rotation = cardPosition.rotation;
+            data_Card[shuffleIndex[index]].Set_Blind(isBlind);
+        }
         public void Set_CardPosition(int index, CardPosition cardPosition, bool isBlind)
         {
             data_Card[shuffleIndex[index]].transform.position = tf_Position[(int)cardPosition].position;
             data_Card[shuffleIndex[index]].transform.rotation = tf_Position[(int)cardPosition].rotation;
             data_Card[shuffleIndex[index]].Set_Blind(isBlind);
         }
+
+        public void Set_Blind(int index, bool isBlind) => data_Card[Get_CardIndex(index)].Set_Blind(isBlind);
+        public int Get_CardIndex(int index) => shuffleIndex[index];
+
         public void Set_Owner(VRCPlayerApi value)
         {
             for (int i = 0; i < data_Card.Length; i++)

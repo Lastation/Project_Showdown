@@ -13,19 +13,32 @@ namespace Holdem
         [SerializeField] MainSystem mainSystem = default;
         [SerializeField] Table_System table_System = default;
         [SerializeField] Table_Player_UI table_Player_UI = default;
+        [SerializeField] Transform[] tf_cardPosition;
         
-        [UdonSynced] int actionChipSize = 0;
-        [UdonSynced] string displayName = "";
-        [UdonSynced] int playerId = 0;
-        [UdonSynced] int tablePlayerChip = 0;
-        [UdonSynced] bool isAction = false;
+        [UdonSynced] int actionChipSize;
+        [UdonSynced] string displayName;
+        [UdonSynced] int playerId;
+        [UdonSynced] int tablePlayerChip;
+        [UdonSynced] bool isAction;
 
         bool isTurn = false;
         int bet = 0;
 
         #region Sync
+        public void Start()
+        {
+            actionChipSize = 0;
+            displayName = "";
+            playerId = 0;
+            tablePlayerChip = 0;
+            isAction = false;
+        }
         public void DoSync() => RequestSerialization();
         public override void OnDeserialization()
+        {
+            Update_Syncs();
+        }
+        public void Update_Syncs()
         {
             Update_DisplayText();
             Update_Action();
@@ -48,18 +61,14 @@ namespace Holdem
         }
         public void Update_Table()
         {
-            if (Networking.IsOwner(table_System.gameObject))
-            {
-                table_System.Update_UI();
-                table_System.DoSync();
-            }
+            table_System.Update_Syncs();
         }
         #endregion
 
         #region Enter & Exit
         public void Enter_Table()
         {
-            if (displayName != "")
+            if (playerId != 0)
                 return;
 
             if (mainSystem.Get_Data_Player().Get_isPlayGame())
@@ -73,7 +82,7 @@ namespace Holdem
             tablePlayerChip = mainSystem.Get_Data_Player().Get_Chip();
             mainSystem.Get_Data_Player().Set_isPlayGame(true);
             table_Player_UI.Set_TablePlayerUI(true);
-            Update_DisplayText();
+            Update_Syncs();
             DoSync();
         }
         public void Exit_Table()
@@ -83,7 +92,7 @@ namespace Holdem
             tablePlayerChip = 0;
             mainSystem.Get_Data_Player().Set_isPlayGame(false);
             table_Player_UI.Set_TablePlayerUI(false);
-            Update_DisplayText();
+            Update_Syncs();
             DoSync();
         }
         #endregion
@@ -135,15 +144,12 @@ namespace Holdem
         public void Add_RaiseChipSize_Reset() => Set_RaiseChipSize(table_System.Get_TableCallSize() * 1, false);
         public void Add_RaiseChipSize_3x() => Set_RaiseChipSize(table_System.Get_TableCallSize() * 2, false);
         public void Add_RaiseChipSize_4x() => Set_RaiseChipSize(table_System.Get_TableCallSize() * 3, false);
-
         public void Add_RaiseChipSize_100() => Set_RaiseChipSize(100, true);
         public void Add_RaiseChipSize_500() => Set_RaiseChipSize(500, true);
         public void Add_RaiseChipSize_1000() => Set_RaiseChipSize(1000, true);
         public void Add_RaiseChipSize_5000() => Set_RaiseChipSize(5000, true);
         public void Add_RaiseChipSize_10000() => Set_RaiseChipSize(10000, true);
-
         public void Add_RaiseChipSize_Allin() => Set_RaiseChipSize(int.MaxValue, true);
-
         public void Set_RaiseChipSize(int value, bool isAdd)
         {
             if (!isTurn)
@@ -168,6 +174,8 @@ namespace Holdem
         public Table_Player_UI Get_table_Player_UI() => table_Player_UI;
         public string Get_DisplayName() => displayName;
 
+        public Transform Get_CardPosition(int idx) => tf_cardPosition[idx];
+
         public override void OnPlayerJoined(VRCPlayerApi player)
         {
             if (!Networking.IsOwner(gameObject)) return;
@@ -179,7 +187,7 @@ namespace Holdem
             if (player.playerId != playerId) return;
             displayName = "";
             playerId = 0;
-            Update_DisplayText();
+            Update_Syncs();
             DoSync();
         }
         public void Set_Owner(VRCPlayerApi value)

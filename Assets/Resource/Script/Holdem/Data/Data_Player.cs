@@ -13,7 +13,7 @@ namespace Holdem
 
     public class Data_Player : UdonSharpBehaviour
     {
-        int chip = 10000;
+        int chip = 20000;
         CardPatternType cardPatternType = CardPatternType.Basic;
 
         [SerializeField] Text text_chip;

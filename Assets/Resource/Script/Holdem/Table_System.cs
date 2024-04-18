@@ -30,7 +30,10 @@ namespace Holdem
         [UdonSynced] PlayerState[] playerState = new PlayerState[9];
         [UdonSynced] int tableTotalPot = 0;
         [UdonSynced] int tableCallSize = 0;
+        [UdonSynced] int table_BB = 200;
         [UdonSynced] int[] playerBetSize = new int[9];
+        [UdonSynced] int[] table_Cards = new int[23];
+        [UdonSynced] string[] s_handRank = new string[9];
         #endregion
 
         [SerializeField] MainSystem mainSystem;
@@ -39,38 +42,69 @@ namespace Holdem
         [SerializeField] Table_System_UI table_System_UI;
 
         #region Sync
+        public void Start()
+        {
+            for (int i = 0; i < playerState.Length; i++)
+                playerState[i] = PlayerState.OutOfGame;
+
+            for (int i = 0; i < playerBetSize.Length; i++)
+                playerBetSize[i] = 0;
+
+            for (int i = 0; i < table_Cards.Length; i++)
+                table_Cards[i] = 0;
+
+            for (int i = 0; i < s_handRank.Length; i++)
+                s_handRank[i] = "";
+        }
+
         public void Update()
         {
             if (!Networking.IsOwner(gameObject))
                 return;
 
             if (Input.GetKeyDown(KeyCode.Q))
-            {
-                playerState[Random.Range(0, 9)] = (PlayerState)Random.Range(0, 4);
-                Update_UI();
-            }
+                Set_PlayerState(Random.Range(0, 9), (PlayerState)Random.Range(0, 6));
         }
         public void DoSync() => RequestSerialization();
         public override void OnDeserialization()
         {
-            Update_UI();
+            Update_Syncs();
+        }
+        public void Update_Syncs()
+        {
+            Update_PlayerState();
+            Update_HandRank();
+            table_System_UI.Set_TableState(9 - Get_TablePlayerCount(), tableState != TableState.Wait);
+        }
+        public void Update_PlayerState()
+        {
+            for (int i = 0; i < table_Players.Length; i++)
+                table_Players[i].Get_table_Player_UI().Set_StateText(playerState[i]);
+        }
+        public void Update_HandRank()
+        {
+            for (int i = 0; i < table_Players.Length; i++)
+            {
+                if (!Networking.IsOwner(table_Players[i].gameObject))
+                    continue;
+                table_Players[i].Get_table_Player_UI().Set_HandRankText(s_handRank[i]);
+            }
         }
         #endregion
 
-        public void Update_UI()
-        {
-            table_System_UI.Set_TableState(9 - Get_TablePlayerCount(), tableState != TableState.Wait);
-        }
-
         #region State Setting
+        public TableState Get_TableState() => tableState;
         public void Set_TableState(TableState state)
         {
             tableState = state;
             DoSync();
         }
+
+        public PlayerState[] Get_PlayerState => playerState;
         public void Set_PlayerState(int idx, PlayerState state)
         {
             playerState[idx] = state;
+            Update_Syncs();
             DoSync();
         }
         public void Reset_PlayerState(int index)
@@ -78,17 +112,9 @@ namespace Holdem
             if (!Networking.IsOwner(gameObject))
                 return;
 
-            playerState[index] = PlayerState.OutOfGame;
-            Update_UI();
-            DoSync();
-        }
-        public void Update_PlayerState()
-        {
-            for (int i = 0; i < table_Players.Length; i++)
-                table_Players[i].Get_table_Player_UI().Set_StateText(playerState[i]);
+            Set_PlayerState(index, PlayerState.OutOfGame);
         }
         #endregion
-
         #region Chip Setting
         public void Set_TableTotalPot(int value)
         {
@@ -107,29 +133,307 @@ namespace Holdem
             DoSync();
         }
         #endregion
-
         #region Sound Effect
         public void Play_AudioClip(SE_Table_Index index) => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table((int)index));
         #endregion
-
         #region Action
         public void Set_BetAction(int tableNumber, int value)
         {
             if (value == -1)
             {
-                playerState[tableNumber] = PlayerState.Fold;
+                Set_PlayerState(tableNumber, PlayerState.Fold);
                 return;
             }
             else
             {
-                playerState[tableNumber] = PlayerState.Call;
+                Set_PlayerState(tableNumber, PlayerState.Call);
                 tableCallSize = value;
                 tableTotalPot += value;
             }
         }
         #endregion
 
-        public Table_Player Get_TablePlayerData(int idx) => table_Players[idx];
+        #region HandRank
+        private string[] s_HandSuit = new string[4]
+        {
+            "♠",
+            "♦",
+            "♥",
+            "♣"
+        };
+        private string[] s_HandNumber = new string[14]
+        {
+            "Null",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "Jack",
+            "Queen",
+            "King",
+            "Ace",
+        };
+
+        HandRanking[] p_handRank = new HandRanking[9];
+        HandNumber[] p_handNumber = new HandNumber[9];
+        HandSuit[] p_handSuit = new HandSuit[9];
+
+        public void Set_HandRank()
+        {
+            for (int i = 0; i < table_Players.Length; i++)
+            {
+                p_handRank[i] = Calculate_HandRank(i);
+                s_handRank[i] = $"{s_HandSuit[(int)p_handSuit[i]]}{s_HandNumber[(int)p_handNumber[i]]} {mainSystem.s_HankRank((int)p_handRank[i])}";
+            }
+            Update_Syncs();
+            DoSync();
+        }
+
+        private HandRanking Calculate_HandRank(int playerID)
+        {
+            int index = 0, tableSuit, tableNumber;
+
+            int[] pair = new int[13];
+            int[] suit = new int[4];
+            bool[] hand = new bool[52];
+
+            for (int i = 0; i < 7; i++)
+            {
+                if (i == 0) index = playerID;
+                else if (i == 1) index = playerID + 9;
+                else index = i + 16;
+
+                if (table_Cards[index] == 52)
+                    continue;
+
+                tableSuit = Mathf.FloorToInt(table_Cards[index] / 13);
+                tableNumber = table_Cards[index] % 13;
+
+                suit[tableSuit]++;
+                pair[tableNumber]++;
+                hand[table_Cards[index]] = true;
+
+                if (tableNumber == 0)
+                {
+                    p_handSuit[playerID] = (HandSuit)tableSuit;
+                    p_handNumber[playerID] = HandNumber.Ace;
+                }
+                else if ((int)p_handNumber[playerID] < tableNumber)
+                {
+                    p_handSuit[playerID] = (HandSuit)tableSuit;
+                    p_handNumber[playerID] = (HandNumber)tableNumber;
+                }
+            }
+
+            if (isRoyalFlush(hand, playerID)) return HandRanking.RoyalFlush;
+            if (isStraightFlush(hand, playerID)) return HandRanking.StraightFlush;
+            if (isFourOfAKind(pair, playerID)) return HandRanking.FourOfAKind;
+            if (isFullHouse(hand, pair, playerID)) return HandRanking.FullHouse;
+            if (isFlush(hand, suit, playerID)) return HandRanking.Flush;
+            if (isBackStraight(hand, pair, playerID)) return HandRanking.BackStraight;
+            if (isMountain(hand, pair, playerID)) return HandRanking.Mountain;
+            if (isStraight(hand, pair, playerID)) return HandRanking.Straight;
+            if (isThreeOfAKind(hand, pair, playerID)) return HandRanking.ThreeOfAKind;
+            if (isTwoPair(hand, pair, playerID)) return HandRanking.TwoPair;
+            if (isOnePair(hand, pair, playerID)) return HandRanking.OnePair;
+
+            return HandRanking.HighCard;
+        }
+        private bool isRoyalFlush(bool[] hand, int playerID)
+        {
+            for (int i = 0; i < 4; i++)
+                if (hand[i * 13 + 0] == true &&
+                    hand[i * 13 + 9] == true &&
+                    hand[i * 13 + 10] == true &&
+                    hand[i * 13 + 11] == true &&
+                    hand[i * 13 + 12] == true)
+                {
+                    p_handSuit[playerID] = (HandSuit)i;
+                    p_handNumber[playerID] = HandNumber.Ace;
+                    return true;
+                }
+            return false;
+        }
+        private bool isStraightFlush(bool[] hand, int playerID)
+        {
+            for (int i = 0; i < 4; i++)
+                for (int j = 0; j < 9; j++)
+                    if (hand[i * 13 + j + 0] == true &&
+                        hand[i * 13 + j + 1] == true &&
+                        hand[i * 13 + j + 2] == true &&
+                        hand[i * 13 + j + 3] == true &&
+                        hand[i * 13 + j + 4] == true)
+                    {
+                        p_handSuit[playerID] = (HandSuit)i;
+                        p_handNumber[playerID] = (HandNumber)(j + 4);
+                        return true;
+                    }
+            return false;
+        }
+        private bool isFourOfAKind(int[] pair, int playerID)
+        {
+            for (int i = 0; i < pair.Length; i++)
+                if (pair[i] == 4)
+                {
+                    p_handSuit[playerID] = HandSuit.Spade;
+                    p_handNumber[playerID] = (HandNumber)i;
+                    return true;
+                }
+            return false;
+        }
+        private bool isFullHouse(bool[] hand, int[] pair, int playerID)
+        {
+            int count = 0;
+
+            if (isThreeOfAKind(hand, pair, playerID))
+            {
+                for (int i = 0; i < pair.Length; i++)
+                    if (pair[i] >= 2)
+                        count++;
+                if (count >= 2)
+                    return true;
+            }
+            return false;
+        }
+        private bool isFlush(bool[] hand, int[] suit, int playerID)
+        {
+            for (int i = 0; i < suit.Length; i++)
+                if (suit[i] >= 5)
+                {
+                    p_handSuit[playerID] = (HandSuit)i;
+                    for (int j = 12; i > 0; i--)
+                        if (hand[i * 13 + j] == true)
+                        {
+                            p_handNumber[playerID] = (HandNumber)j;
+                            break;
+                        }
+                    if (hand[i * 13] == true) p_handNumber[playerID] = HandNumber.Ace;
+                    return true;
+                }
+            return false;
+        }
+        private bool isBackStraight(bool[] hand, int[] pair, int playerID)
+        {
+            if (pair[0] != 0 && pair[1] != 0 && pair[2] != 0 && pair[3] != 0 && pair[4] != 0)
+            {
+                if (hand[00] == true) p_handSuit[playerID] = HandSuit.Spade;
+                else if (hand[13] == true) p_handSuit[playerID] = HandSuit.Diamond;
+                else if (hand[26] == true) p_handSuit[playerID] = HandSuit.Heart;
+                else if (hand[39] == true) p_handSuit[playerID] = HandSuit.Clover;
+                p_handNumber[playerID] = HandNumber.Ace;
+                return true;
+            }
+            return false;
+        }
+        private bool isMountain(bool[] hand, int[] pair, int playerID)
+        {
+            if (pair[0] != 0 && pair[10] != 0 && pair[10] != 0 && pair[11] != 0 && pair[12] != 0)
+            {
+                if (hand[00] == true) p_handSuit[playerID] = HandSuit.Spade;
+                else if (hand[13] == true) p_handSuit[playerID] = HandSuit.Diamond;
+                else if (hand[26] == true) p_handSuit[playerID] = HandSuit.Heart;
+                else if (hand[39] == true) p_handSuit[playerID] = HandSuit.Clover;
+                p_handNumber[playerID] = HandNumber.Ace;
+                return true;
+            }
+            return false;
+        }
+        private bool isStraight(bool[] hand, int[] pair, int playerID)
+        {
+            for (int i = 0; i < 9; i++)
+                if (pair[i] != 0 && pair[i + 1] != 0 && pair[i + 2] != 0 && pair[i + 3] != 0 && pair[i + 4] != 0)
+                {
+                    if (hand[i + 04] == true) p_handSuit[playerID] = HandSuit.Spade;
+                    else if (hand[i + 17] == true) p_handSuit[playerID] = HandSuit.Diamond;
+                    else if (hand[i + 30] == true) p_handSuit[playerID] = HandSuit.Heart;
+                    else if (hand[i + 43] == true) p_handSuit[playerID] = HandSuit.Clover;
+                    p_handNumber[playerID] = (HandNumber)(i + 4);
+                    return true;
+                }
+            return false;
+        }
+        private bool isThreeOfAKind(bool[] hand, int[] pair, int playerID)
+        {
+            for (int i = 0; i < pair.Length; i++)
+                if (pair[i] == 3)
+                {
+                    if (hand[i + 00] == true) p_handSuit[playerID] = HandSuit.Spade;
+                    else if (hand[i + 13] == true) p_handSuit[playerID] = HandSuit.Diamond;
+                    else if (hand[i + 26] == true) p_handSuit[playerID] = HandSuit.Heart;
+                    else if (hand[i + 39] == true) p_handSuit[playerID] = HandSuit.Clover;
+
+                    if (i == 0) p_handNumber[playerID] = HandNumber.Ace;
+                    else p_handNumber[playerID] = (HandNumber)i;
+                    return true;
+                }
+            return false;
+        }
+        private bool isTwoPair(bool[] hand, int[] pair, int playerID)
+        {
+            int count = 0;
+            int[] num = new int[3];
+
+            for (int i = 0; i < pair.Length; i++)
+                if (pair[i] == 2)
+                {
+                    num[count] = i;
+                    count++;
+                }
+            if (count >= 2)
+            {
+                if (num[0] == 0)
+                {
+                    if (hand[num[0] + 00] == true) p_handSuit[playerID] = HandSuit.Spade;
+                    else if (hand[num[0] + 13] == true) p_handSuit[playerID] = HandSuit.Diamond;
+                    else if (hand[num[0] + 26] == true) p_handSuit[playerID] = HandSuit.Heart;
+                    else if (hand[num[0] + 39] == true) p_handSuit[playerID] = HandSuit.Clover;
+                    p_handNumber[playerID] = HandNumber.Ace;
+                }
+                else if (num[2] != 0)
+                {
+                    if (hand[num[2] + 00] == true) p_handSuit[playerID] = HandSuit.Spade;
+                    else if (hand[num[2] + 13] == true) p_handSuit[playerID] = HandSuit.Diamond;
+                    else if (hand[num[2] + 26] == true) p_handSuit[playerID] = HandSuit.Heart;
+                    else if (hand[num[2] + 39] == true) p_handSuit[playerID] = HandSuit.Clover;
+                    p_handNumber[playerID] = (HandNumber)num[2];
+                }
+                else
+                {
+                    if (hand[num[1] + 00] == true) p_handSuit[playerID] = HandSuit.Spade;
+                    else if (hand[num[1] + 13] == true) p_handSuit[playerID] = HandSuit.Diamond;
+                    else if (hand[num[1] + 26] == true) p_handSuit[playerID] = HandSuit.Heart;
+                    else if (hand[num[1] + 39] == true) p_handSuit[playerID] = HandSuit.Clover;
+                    p_handNumber[playerID] = (HandNumber)num[1];
+                }
+
+                return true;
+            }
+            return false;
+        }
+        private bool isOnePair(bool[] hand, int[] pair, int playerID)
+        {
+            for (int i = 0; i < pair.Length; i++)
+                if (pair[i] == 2)
+                {
+                    if (hand[i + 00] == true) p_handSuit[playerID] = HandSuit.Spade;
+                    else if (hand[i + 13] == true) p_handSuit[playerID] = HandSuit.Diamond;
+                    else if (hand[i + 26] == true) p_handSuit[playerID] = HandSuit.Heart;
+                    else if (hand[i + 39] == true) p_handSuit[playerID] = HandSuit.Clover;
+
+                    if (i == 0) p_handNumber[playerID] = HandNumber.Ace;
+                    else p_handNumber[playerID] = (HandNumber)i;
+                    return true;
+                }
+            return false;
+        }
+        #endregion
+
+        public Table_Player[] Get_TablePlayerData => table_Players;
         public int Get_TablePlayerCount()
         {
             int count = 0;
@@ -139,27 +443,65 @@ namespace Holdem
             return count;
         }
 
+        public void Set_TableCard(int index, int value) => table_Cards[index] = value;
+        public int[] Get_TableCard => table_Cards;
+
         public Table_System_UI Get_TableSystemUI() => table_System_UI;
 
         public override void OnPlayerJoined(VRCPlayerApi player)
         {
             if (!Networking.IsOwner(gameObject)) return;
-            Update_UI();
+            Update_Syncs();
             DoSync();
         }
         public override void OnPlayerLeft(VRCPlayerApi player)
         {
             if (!Networking.IsOwner(gameObject)) return;
+
             for (int i = 0; i < playerState.Length; i++)
-            {
-                if (Get_TablePlayerData(i).Get_DisplayName() == player.displayName)
-                {
-                    playerState[i] = PlayerState.OutOfGame;
-                    break;
-                }
-            }
-            Update_UI();
+                if (Get_TablePlayerData[i].Get_DisplayName() == player.displayName)
+                    Set_PlayerState(i, PlayerState.OutOfGame);
+            Update_Syncs();
             DoSync();
         }
+    }
+
+    public enum HandRanking : int
+    {
+        HighCard = 0,
+        OnePair,
+        TwoPair,
+        ThreeOfAKind,
+        Straight,
+        BackStraight,
+        Mountain,
+        Flush,
+        FullHouse,
+        FourOfAKind,
+        StraightFlush,
+        RoyalFlush
+    }
+    public enum HandSuit : int
+    {
+        Spade = 0,
+        Diamond = 1,
+        Heart = 2,
+        Clover = 3
+    }
+    public enum HandNumber : int
+    {
+        Ace = 13,
+        King = 12,
+        Queen = 11,
+        Jack = 10,
+        Ten = 9,
+        Nine = 8,
+        Eight = 7,
+        Seven = 6,
+        Six = 5,
+        Five = 4,
+        Four = 3,
+        Three = 2,
+        Two = 1,
     }
 }

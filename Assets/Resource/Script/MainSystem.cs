@@ -81,6 +81,20 @@ public class MainSystem : UdonSharpBehaviour
     public string s_AvatarLight => localization.s_AvatarLight[(int)localizationType];
     public string s_TableState_progress => localization.s_TableState_progress[(int)localizationType];
     public string s_TableState_wait => localization.s_TableState_wait[(int)localizationType];
+    public string s_HankRank(int idx)
+    {
+        switch (localizationType)
+        {
+            case LocalizationType.KOR:
+                return localization.s_HankRank_KOR[idx];
+            case LocalizationType.JP:
+                return localization.s_HankRank_JP[idx];
+            case LocalizationType.ENG:
+                return localization.s_HankRank_ENG[idx];
+            default:
+                return null;
+        }
+    }
     #endregion
 
     [SerializeField]

@@ -12,12 +12,16 @@ namespace Holdem
         [SerializeField] VRCPickup vrcPickup;
         [SerializeField] SpriteRenderer sr_pattern;
 
-        [UdonSynced] bool isBlind = true;
+        [UdonSynced] bool isBlind;
 
         int i_cardIndex = 0;
         Sprite sprite = null;
 
-        public void Start() => Set_Pickupable(false);
+        public void Start()
+        {
+            isBlind = true;
+            Set_Pickupable(false);
+        }
         public void DoSync() => RequestSerialization();
         public override void OnDeserialization()
         {
