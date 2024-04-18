@@ -13,7 +13,6 @@ namespace Holdem
         River = 4,
         Open = 5,
     }
-
     public enum PlayerState : int
     {
         OutOfGame = 0,
@@ -25,6 +24,9 @@ namespace Holdem
 
     public class Table_System : UdonSharpBehaviour
     {
+        /// <summary>
+        /// Variables
+        /// </summary>
         #region Sync Varialbes
         [UdonSynced] TableState tableState;
         [UdonSynced] PlayerState[] playerState = new PlayerState[9];
@@ -35,63 +37,20 @@ namespace Holdem
         [UdonSynced] int[] table_Cards = new int[23];
         [UdonSynced] string[] s_handRank = new string[9];
         #endregion
-
+        #region Static Variables
         [SerializeField] MainSystem mainSystem;
         [SerializeField] AudioSource audioSource;
         [SerializeField] Table_Player[] table_Players;
         [SerializeField] Table_System_UI table_System_UI;
-
-        #region Sync
-        public void Start()
-        {
-            for (int i = 0; i < playerState.Length; i++)
-                playerState[i] = PlayerState.OutOfGame;
-
-            for (int i = 0; i < playerBetSize.Length; i++)
-                playerBetSize[i] = 0;
-
-            for (int i = 0; i < table_Cards.Length; i++)
-                table_Cards[i] = 0;
-
-            for (int i = 0; i < s_handRank.Length; i++)
-                s_handRank[i] = "";
-        }
-
-        public void Update()
-        {
-            if (!Networking.IsOwner(gameObject))
-                return;
-
-            if (Input.GetKeyDown(KeyCode.Q))
-                Set_PlayerState(Random.Range(0, 9), (PlayerState)Random.Range(0, 6));
-        }
-        public void DoSync() => RequestSerialization();
-        public override void OnDeserialization()
-        {
-            Update_Syncs();
-        }
-        public void Update_Syncs()
-        {
-            Update_PlayerState();
-            Update_HandRank();
-            table_System_UI.Set_TableState(9 - Get_TablePlayerCount(), tableState != TableState.Wait);
-        }
-        public void Update_PlayerState()
-        {
-            for (int i = 0; i < table_Players.Length; i++)
-                table_Players[i].Get_table_Player_UI().Set_StateText(playerState[i]);
-        }
-        public void Update_HandRank()
-        {
-            for (int i = 0; i < table_Players.Length; i++)
-            {
-                if (!Networking.IsOwner(table_Players[i].gameObject))
-                    continue;
-                table_Players[i].Get_table_Player_UI().Set_HandRankText(s_handRank[i]);
-            }
-        }
+        [SerializeField] Table_Card table_Card;
+        #endregion
+        #region Local Variables
+        int table_TurnIndex, table_DealerIndex = 0;
         #endregion
 
+        /// <summary>
+        /// Functions
+        /// </summary>
         #region State Setting
         public TableState Get_TableState() => tableState;
         public void Set_TableState(TableState state)
@@ -100,12 +59,20 @@ namespace Holdem
             DoSync();
         }
 
-        public PlayerState[] Get_PlayerState => playerState;
         public void Set_PlayerState(int idx, PlayerState state)
         {
             playerState[idx] = state;
             Update_Syncs();
             DoSync();
+        }
+        public void Set_PlayerState(int idx)
+        {
+            for (int i = 0; i < playerState.Length; i++)
+            {
+                if (playerState[Get_TurnIndex(idx + i)] == PlayerState.Call)
+                    playerState[Get_TurnIndex(idx + i)] = PlayerState.Wait;
+            }
+            playerState[idx] = PlayerState.Call;
         }
         public void Reset_PlayerState(int index)
         {
@@ -142,17 +109,112 @@ namespace Holdem
             if (value == -1)
             {
                 Set_PlayerState(tableNumber, PlayerState.Fold);
+                Set_NextTurn();
                 return;
             }
             else
             {
-                Set_PlayerState(tableNumber, PlayerState.Call);
+                if (value != tableCallSize)
+                    Set_PlayerState(tableNumber);
                 tableCallSize = value;
                 tableTotalPot += value;
+                Set_NextTurn();
+            }
+            Update_Syncs();
+            DoSync();
+        }
+        public void Set_NextTurn()
+        {
+            bool isNextStep = true;
+
+            for (int i = 0; i < playerState.Length; i++)
+            {
+                if (playerState[i] == PlayerState.Wait)
+                {
+                    isNextStep = false;
+                    break;
+                }
+            }
+
+            if (isNextStep)
+                Set_GameAuto();
+
+            Set_TurnIndex(table_TurnIndex + 1);
+        }
+        #endregion
+        #region Game
+        public void Set_GameStart()
+        {
+            if (tableState != TableState.Wait)
+                return;
+            Set_GameAuto();
+        }
+        public void Set_GameAuto()
+        {
+            switch (tableState)
+            {
+                case TableState.Wait:
+                    table_Card.Reset_CardPosition();
+                    table_Card.Shuffle_Card();
+                    Set_TableState(TableState.Hand);
+                    table_DealerIndex += 1;
+                    break;
+                case TableState.Hand:
+                    for (int i = 0; i < Get_TablePlayerData.Length; i++)
+                    {
+                        if (playerState[i] != PlayerState.Wait)
+                            continue;
+                        table_Card.Set_CardPosition(i, Get_TablePlayerData[i].Get_CardPosition(0), true);
+                        Set_TableCard(i, table_Card.Get_CardIndex(i));
+                        table_Card.Set_CardPosition(i + 9, Get_TablePlayerData[i].Get_CardPosition(1), true);
+                        Set_TableCard(i + 9, table_Card.Get_CardIndex(i + 9));
+                    }
+                    Set_TurnIndex(table_DealerIndex);
+                    Set_HandRank();
+                    Set_TableState(TableState.Flop);
+                    break;
+                case TableState.Flop:
+                    for (int i = 0; i < 3; i++)
+                    {
+                        table_Card.Set_CardPosition(i + 18, (CardPosition)(i + 1), true);
+                        Set_TableCard(i + 18, table_Card.Get_CardIndex(i + 18));
+                    }
+                    Set_HandRank();
+                    Set_TableState(TableState.Turn);
+                    break;
+                case TableState.Turn:
+                    table_Card.Set_CardPosition(21, CardPosition.Turn, true);
+                    Set_TableCard(21, table_Card.Get_CardIndex(21));
+                    Set_HandRank();
+                    Set_TableState(TableState.River);
+                    break;
+                case TableState.River:
+                    table_Card.Set_CardPosition(22, CardPosition.Turn, true);
+                    Set_TableCard(22, table_Card.Get_CardIndex(22));
+                    Set_HandRank();
+                    Set_TableState(TableState.Open);
+                    break;
+                case TableState.Open:
+                    for (int i = 0; i < Get_TableCard.Length; i++)
+                        table_Card.Set_Blind(i, false);
+                    Set_TableState(TableState.Wait);
+                    break;
+            }
+        }
+        public int Get_TurnIndex(int value) => value % 9;
+        public void Set_TurnIndex(int value)
+        {
+            for (int i = 0; i < table_Players.Length; i++)
+            {
+                if (playerState[Get_TurnIndex(i + value)] != PlayerState.Wait)
+                    continue;
+
+                table_TurnIndex = Get_TurnIndex(i + value);
+                Set_PlayerState(table_TurnIndex, PlayerState.Turn);
+                break;
             }
         }
         #endregion
-
         #region HandRank
         private string[] s_HandSuit = new string[4]
         {
@@ -433,6 +495,9 @@ namespace Holdem
         }
         #endregion
 
+        /// <summary>
+        /// Get & Set Functions
+        /// </summary>
         public Table_Player[] Get_TablePlayerData => table_Players;
         public int Get_TablePlayerCount()
         {
@@ -448,6 +513,60 @@ namespace Holdem
 
         public Table_System_UI Get_TableSystemUI() => table_System_UI;
 
+        /// <summary>
+        ///  Network Fuctions
+        /// </summary>
+        #region Sync
+        public void Start()
+        {
+            for (int i = 0; i < playerState.Length; i++)
+                playerState[i] = PlayerState.OutOfGame;
+
+            for (int i = 0; i < playerBetSize.Length; i++)
+                playerBetSize[i] = 0;
+
+            for (int i = 0; i < table_Cards.Length; i++)
+                table_Cards[i] = 0;
+
+            for (int i = 0; i < s_handRank.Length; i++)
+                s_handRank[i] = "";
+        }
+        /// Just Test Delete Later
+        public void Update()
+        {
+            if (!Networking.IsOwner(gameObject))
+                return;
+
+            if (Input.GetKeyDown(KeyCode.Q))
+                Set_PlayerState(Random.Range(0, 9), (PlayerState)Random.Range(0, 6));
+        }
+        public void DoSync() => RequestSerialization();
+        public override void OnDeserialization()
+        {
+            Update_Syncs();
+        }
+        public void Update_Syncs()
+        {
+            Update_PlayerState();
+            Update_HandRank();
+            table_System_UI.Set_TableState(9 - Get_TablePlayerCount(), tableState != TableState.Wait);
+        }
+        public void Update_PlayerState()
+        {
+            for (int i = 0; i < table_Players.Length; i++)
+                table_Players[i].Get_table_Player_UI().Set_StateText(playerState[i]);
+        }
+        public void Update_HandRank()
+        {
+            for (int i = 0; i < table_Players.Length; i++)
+            {
+                if (!Networking.IsOwner(table_Players[i].gameObject))
+                    continue;
+                table_Players[i].Get_table_Player_UI().Set_HandRankText(s_handRank[i]);
+            }
+        }
+        #endregion
+        #region Networking
         public override void OnPlayerJoined(VRCPlayerApi player)
         {
             if (!Networking.IsOwner(gameObject)) return;
@@ -464,6 +583,7 @@ namespace Holdem
             Update_Syncs();
             DoSync();
         }
+        #endregion
     }
 
     public enum HandRanking : int
