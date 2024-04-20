@@ -16,6 +16,8 @@ namespace Holdem
         [SerializeField] GameObject obj_TableJoin, obj_TableExit;
 
         [SerializeField] Image[] img_button;
+        [SerializeField] Image[] img_cards;
+        [SerializeField] MainSystem mainSystem;
 
         Color color_button = new Color(0.0627451f, 0.509804f, 1, 1);
         string[] s_playerState = new string[5] { "", "Wait", "Turn", "Call", "Fold" };
@@ -39,13 +41,26 @@ namespace Holdem
                 img_button[i].color = isTurn ? color_button : Color.black;
         }
 
-        public void Set_CallText(int value) => text_Call.text = $"call [ {value} ]";
+        public void Set_CallText(int value) => text_Call.text = value == 0 ? $"check" : $"call [ {value} ]";
         public void Set_CallText_Allin(int value) => text_Call.text = $"all in [ {value} ]";
 
         public void Set_RaiseText(int value) => text_Raise.text = $"raise [ {value} ]";
         public void Set_RaiseText_Allin(int value) => text_Raise.text = $"all in [ { value } ]";
 
         public void Set_HandRankText(string value) => text_Handrank.text = value;
+        public void Set_CardImage(int[] table_Cards, int idx)
+        {
+            if (!Networking.IsOwner(gameObject))
+                return;
+
+            img_cards[0].sprite = mainSystem.Get_CardPattern()[table_Cards[0 + idx]];
+            img_cards[1].sprite = mainSystem.Get_CardPattern()[table_Cards[9 + idx]];
+            img_cards[2].sprite = mainSystem.Get_CardPattern()[table_Cards[18]];
+            img_cards[3].sprite = mainSystem.Get_CardPattern()[table_Cards[19]];
+            img_cards[4].sprite = mainSystem.Get_CardPattern()[table_Cards[20]];
+            img_cards[5].sprite = mainSystem.Get_CardPattern()[table_Cards[21]];
+            img_cards[6].sprite = mainSystem.Get_CardPattern()[table_Cards[22]];
+        }
 
         public void Set_Owner(VRCPlayerApi value)
         {

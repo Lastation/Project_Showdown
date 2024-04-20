@@ -11,12 +11,11 @@ namespace Holdem
     {
         [SerializeField] VRCPickup vrcPickup;
         [SerializeField] SpriteRenderer sr_pattern;
+        [SerializeField] MainSystem mainSystem;
+        [SerializeField] int i_cardIndex = 0;
 
-        [UdonSynced] bool isBlind;
-
-        int i_cardIndex = 0;
-        Sprite sprite = null;
-
+        [UdonSynced] bool isBlind = false;
+        
         public void Start()
         {
             isBlind = true;
@@ -28,16 +27,14 @@ namespace Holdem
             Update_Blind(isBlind);
         }
 
-        public void Update_Blind(bool value) => sr_pattern.sprite = value ? null : sprite;
-        public void Set_Card_Pattern(Sprite value)
+        public void Update_Blind(bool value) => sr_pattern.sprite = value ? null : mainSystem.Get_CardPattern()[i_cardIndex];
+        public void Set_Card_Pattern()
         {
-            sr_pattern.sprite = value;
-            sprite = value;
+            sr_pattern.sprite = mainSystem.Get_CardPattern()[i_cardIndex];
         }
 
-        public void Set_CardIndex(int value) => i_cardIndex = value;
         public int Get_CardIndex() => i_cardIndex;
-
+        public void Set_Rotation() => transform.eulerAngles = new Vector3(transform.eulerAngles.x + 180.0f, transform.eulerAngles.y, transform.eulerAngles.z);
         public void Set_Pickupable(bool value) => vrcPickup.pickupable = value;
         public void Set_Blind(bool value)
         {

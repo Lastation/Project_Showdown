@@ -107,4 +107,24 @@ public class MainSystem : UdonSharpBehaviour
     AudioClip[] audioClip_Table;
     public AudioClip Get_AudioClip_Table(int index) => audioClip_Table[index];
     #endregion
+
+    #region Card Sprite
+    [SerializeField] Sprite[] img_cardPattern_Basic;
+    [SerializeField] Sprite[] img_cardPattern_Simple;
+
+    public Sprite[] Get_CardPattern()
+    {
+        switch (Get_Data_Player().Get_cardPatternType())
+        {
+            case CardPatternType.Basic:
+                return img_cardPattern_Basic;
+            case CardPatternType.Simple:
+                return img_cardPattern_Simple;
+            default:
+                return img_cardPattern_Basic;
+        }
+    }
+    public void Set_CardPattern_Basic() => data_Player.Set_cardPatternType(CardPatternType.Basic);
+    public void Set_CardPattern_Simple() => data_Player.Set_cardPatternType(CardPatternType.Simple);
+    #endregion
 }

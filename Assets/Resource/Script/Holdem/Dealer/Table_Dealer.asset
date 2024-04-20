@@ -362,7 +362,7 @@ MonoBehaviour:
       Data: 23|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: Table_Dealer_UI, Assembly-CSharp
+      Data: Holdem.Table_Dealer_UI, Assembly-CSharp
     - Name: 
       Entry: 8
       Data: 

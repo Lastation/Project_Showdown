@@ -1,27 +1,32 @@
 ﻿using Newtonsoft.Json.Linq;
+using System;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Holdem
 {
+    [Serializable]
     public enum CardPatternType : int
     {
-        Basic = 0,
-        Simple = 1,
+        Null = 0,
+        Basic = 1,
+        Simple = 2,
     }
 
     public class Data_Player : UdonSharpBehaviour
     {
         int chip = 20000;
-        CardPatternType cardPatternType = CardPatternType.Basic;
-
+        [SerializeField] CardPatternType cardPatternType;
         [SerializeField] Text text_chip;
 
-        Table_Card table_Card;
         bool isPlayGame = false;
 
-        public void DoSync() => RequestSerialization();
+        public void DoSync()
+        {
+            Update_UI();
+            RequestSerialization();
+        }
         public override void OnDeserialization()
         {
             Update_UI();
@@ -34,12 +39,12 @@ namespace Holdem
 
         public void Update_UI()
         {
-
+            text_chip.text = chip.ToString();
         }
 
-        public void Add_Chip(int value)
+        public void Pay_Chip(int value)
         {
-            chip += value;
+            chip -= value;
             text_chip.text = value.ToString();
             DoSync();
         }

@@ -17,27 +17,6 @@ public class Table_Dealer : UdonSharpBehaviour
     [SerializeField] Table_Card table_Card;
     [SerializeField] Table_Dealer_UI table_Dealer_UI;
 
-    #region Sync
-    public void Start()
-    {
-        displayName = "";
-        playerId = 0; 
-        table_Pot = 0;
-    }
-    public void DoSync() => RequestSerialization();
-    public override void OnDeserialization()
-    {
-        UpdateSync();
-    }
-    public void UpdateSync()
-    {
-        Update_DisplayText();
-    }
-    public void Update_DisplayText()
-    {
-        table_System.Get_TableSystemUI().Set_Dealer_Displayname(displayName);
-    }
-    #endregion
 
     #region Enter & Exit
     public void Enter_Table()
@@ -46,17 +25,22 @@ public class Table_Dealer : UdonSharpBehaviour
             return;
 
         Set_Owner(Networking.LocalPlayer);
+        table_System.Set_Owner(Networking.LocalPlayer);
+        table_Dealer_UI.Set_Owner(Networking.LocalPlayer);
         table_Card.Set_Owner(Networking.LocalPlayer);
 
         displayName = Networking.LocalPlayer.displayName;
         playerId = Networking.LocalPlayer.playerId;
-        UpdateSync();
+        table_Dealer_UI.Set_TableDealerUI(true);
+        table_Card.Set_Pickupable(false);
+        table_Card.Init_Card();
         DoSync();
     }
     public void Exit_Table()
     {
         displayName = "";
-        UpdateSync();
+        table_Dealer_UI.Set_TableDealerUI(false);
+        table_Card.Set_Pickupable(false);
         DoSync();
     }
 
@@ -69,6 +53,31 @@ public class Table_Dealer : UdonSharpBehaviour
 
     public Table_Dealer_UI Get_Table_Dealer_UI() => table_Dealer_UI;
 
+    #region Sync
+    public void Start()
+    {
+        displayName = "";
+        playerId = 0;
+        table_Pot = 0;
+    }
+    public void DoSync()
+    {
+        UpdateSync();
+        RequestSerialization();
+    }
+    public override void OnDeserialization()
+    {
+        UpdateSync();
+    }
+    public void UpdateSync()
+    {
+        Update_DisplayText();
+    }
+    public void Update_DisplayText()
+    {
+        table_System.Get_TableSystemUI().Set_Dealer_Displayname(displayName);
+        table_Dealer_UI.Update_UI(displayName);
+    }
     public override void OnPlayerJoined(VRCPlayerApi player)
     {
         if (!Networking.IsOwner(gameObject)) return;
@@ -80,7 +89,7 @@ public class Table_Dealer : UdonSharpBehaviour
         if (player.playerId != playerId) return;
         displayName = "";
         playerId = 0;
-        UpdateSync();
         DoSync();
     }
+    #endregion
 }
