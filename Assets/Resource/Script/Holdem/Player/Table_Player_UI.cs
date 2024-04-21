@@ -20,7 +20,7 @@ namespace Holdem
         [SerializeField] MainSystem mainSystem;
 
         Color color_button = new Color(0.0627451f, 0.509804f, 1, 1);
-        string[] s_playerState = new string[5] { "", "Wait", "Turn", "Call", "Fold" };
+        string[] s_playerState = new string[7] { "", "Wait", "Turn", "Call", "Check", "Raise", "Fold" };
 
         public void Update_UI(string displayName, int tablePlayerChip)
         {

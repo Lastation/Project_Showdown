@@ -19,11 +19,13 @@ public enum handMenuIndex : int
 
 public enum SE_Table_Index : int
 {
-    DrawCard = 0,
-    Call = 1,
-    Check = 2,
-    Raise = 3,
-    Fold = 4
+    Fold = 0,
+    DrawCard = 1,
+    Turn = 2,
+    Call = 3,
+    Check = 4,
+    Raise = 5,
+    Win = 6
 }
 
 public class MainSystem : UdonSharpBehaviour
@@ -105,7 +107,7 @@ public class MainSystem : UdonSharpBehaviour
     #region Sound Effect
     [SerializeField]
     AudioClip[] audioClip_Table;
-    public AudioClip Get_AudioClip_Table(int index) => audioClip_Table[index];
+    public AudioClip Get_AudioClip_Table(SE_Table_Index index) => audioClip_Table[(int)index];
     #endregion
 
     #region Card Sprite

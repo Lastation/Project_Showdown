@@ -1,4 +1,5 @@
-﻿using UdonSharp;
+﻿using System.Runtime.Remoting.Messaging;
+using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
@@ -19,7 +20,9 @@ namespace Holdem
         Wait = 1,
         Turn = 2,
         Call = 3,
-        Fold = 4,
+        Check = 4,
+        Raise = 5,
+        Fold = 6,
     }
 
     public enum HandRanking : int
@@ -102,10 +105,9 @@ namespace Holdem
         {
             for (int i = 0; i < playerState.Length; i++)
             {
-                if (playerState[i] == PlayerState.Call)
+                if (Get_PlayerInGame(i))
                     playerState[i] = PlayerState.Wait;
             }
-            playerState[idx] = PlayerState.Call;
         }
         public void Reset_PlayerState(int index)
         {
@@ -134,7 +136,37 @@ namespace Holdem
         }
         #endregion
         #region Sound Effect
-        public void Play_AudioClip(SE_Table_Index index) => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table((int)index));
+        public void Play_AudioClip_Fold() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table(SE_Table_Index.Fold));
+        public void Play_AudioClip_DrawCard() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table(SE_Table_Index.DrawCard));
+        public void Play_AudioClip_Turn() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table(SE_Table_Index.Turn));
+        public void Play_AudioClip_Call() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table(SE_Table_Index.Call));
+        public void Play_AudioClip_Check() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table(SE_Table_Index.Check));
+        public void Play_AudioClip_Raise() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table(SE_Table_Index.Raise));
+
+        public void Play_AudioClip(SE_Table_Index index)
+        {
+            switch(index)
+            {
+                case SE_Table_Index.Fold:
+                    SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Play_AudioClip_Fold");
+                    return;
+                case SE_Table_Index.DrawCard:
+                    SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Play_AudioClip_DrawCard");
+                    return;
+                case SE_Table_Index.Turn:
+                    SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Play_AudioClip_Turn");
+                    return;
+                case SE_Table_Index.Call:
+                    SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Play_AudioClip_Call");
+                    return;
+                case SE_Table_Index.Check:
+                    SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Play_AudioClip_Check");
+                    return;
+                case SE_Table_Index.Raise:
+                    SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Play_AudioClip_Raise");
+                    return;
+            }
+        }
         #endregion
         #region Action
         public void Set_BetAction(int tableNumber, int value)
@@ -142,14 +174,30 @@ namespace Holdem
             if (value == -1)
             {
                 Set_PlayerState(tableNumber, PlayerState.Fold);
+                Play_AudioClip(SE_Table_Index.Fold);
                 Set_NextTurn();
                 return;
             }
             else
             {
-                Set_PlayerState(tableNumber, PlayerState.Call);
                 if (value != tableCallSize)
+                {
+                    Play_AudioClip(SE_Table_Index.Raise);
                     Set_PlayerState(tableNumber);
+                    Set_PlayerState(tableNumber, PlayerState.Raise);
+                }
+                else if (playerBetSize[tableNumber] == tableCallSize)
+                {
+                    Set_PlayerState(tableNumber, PlayerState.Check);
+                    Play_AudioClip(SE_Table_Index.Check);
+                }
+                else
+                {
+                    Set_PlayerState(tableNumber, PlayerState.Call);
+                    Play_AudioClip(SE_Table_Index.Call);
+                }
+
+                Set_PlayerBetSize(tableNumber, value);
                 tableCallSize = value;
                 tableTotalPot += value;
                 Set_NextTurn();
@@ -178,7 +226,7 @@ namespace Holdem
             if (isNextStep)
             {
                 for (int i = 0; i < playerState.Length; i++)
-                    if (playerState[i] == PlayerState.Call)
+                    if (Get_PlayerInGame(i))
                         playerState[i] = PlayerState.Wait;
                 Set_GameAuto();
             }
@@ -228,17 +276,17 @@ namespace Holdem
                 case TableState.Hand:
                     for (int i = 0; i < Get_TablePlayerData.Length; i++)
                     {
-                        if (playerState[i] != PlayerState.Wait)
+                        if (!Get_PlayerInGame(i))
                             continue;
                         table_Card.Set_CardPosition(i, Get_TablePlayerData[i].Get_CardPosition[0], true);
                         Set_TableCard(i, table_Card.Get_CardIndex(i));
                         table_Card.Set_CardPosition(i + 9, Get_TablePlayerData[i].Get_CardPosition[1], true);
                         Set_TableCard(i + 9, table_Card.Get_CardIndex(i + 9));
                     }
-
                     Set_TurnIndex(table_DealerIndex);
                     Set_HandRank();
                     Set_TableState(TableState.Flop);
+                    Play_AudioClip(SE_Table_Index.DrawCard);
                     break;
                 case TableState.Flop:
                     for (int i = 0; i < 3; i++)
@@ -248,23 +296,26 @@ namespace Holdem
                     }
                     Set_HandRank();
                     Set_TableState(TableState.Turn);
+                    Play_AudioClip(SE_Table_Index.DrawCard);
                     break;
                 case TableState.Turn:
                     table_Card.Set_CardPosition(21, CardPosition.Turn, false);
                     Set_TableCard(21, table_Card.Get_CardIndex(21));
                     Set_HandRank();
                     Set_TableState(TableState.River);
+                    Play_AudioClip(SE_Table_Index.DrawCard);
                     break;
                 case TableState.River:
                     table_Card.Set_CardPosition(22, CardPosition.River, false);
                     Set_TableCard(22, table_Card.Get_CardIndex(22));
                     Set_HandRank();
                     Set_TableState(TableState.Open);
+                    Play_AudioClip(SE_Table_Index.DrawCard);
                     break;
                 case TableState.Open:
                     for (int i = 0; i < 18; i++)
                     {
-                        if (playerState[i % 9] == PlayerState.Wait || playerState[i % 9] == PlayerState.Call || playerState[i % 9] == PlayerState.Turn)
+                        if (Get_PlayerInGame(i % 9))
                         {
                             table_Card.Set_Blind(i, false);
                             table_Card.Set_CardRotation(i);
@@ -274,6 +325,10 @@ namespace Holdem
                     break;
             }
             DoSync();
+        }
+        public bool Get_PlayerInGame(int index)
+        {
+            return playerState[index] != PlayerState.Fold && playerState[index] != PlayerState.OutOfGame;
         }
         public int Get_TurnIndex(int value) => value % 9;
         public void Set_TurnIndex(int value)
