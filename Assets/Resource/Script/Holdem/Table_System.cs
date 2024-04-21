@@ -2,6 +2,7 @@
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
+using static UnityEngine.Rendering.DebugUI;
 
 namespace Holdem
 {
@@ -78,6 +79,7 @@ namespace Holdem
         [UdonSynced] string[] s_handRank = new string[9];
         #endregion
         #region Static Variables
+        [SerializeField] TableState tableStatePrev = TableState.Wait;
         [SerializeField] MainSystem mainSystem;
         [SerializeField] AudioSource audioSource;
         [SerializeField] Table_Player[] table_Players;
@@ -128,7 +130,8 @@ namespace Holdem
             tableCallSize = value;
             DoSync();
         }
-        public int Get_TableCallSize() => tableCallSize;
+        public int Get_TableCallSize() => tableCallSize == 0 ? table_BB : tableCallSize;
+        public int Get_TableBBSize() => table_BB;
         public void Set_PlayerBetSize(int idx, int value)
         {
             playerBetSize[idx] = value;
@@ -197,9 +200,9 @@ namespace Holdem
                     Play_AudioClip(SE_Table_Index.Call);
                 }
 
-                Set_PlayerBetSize(tableNumber, value);
+                tableTotalPot += value - playerBetSize[tableNumber];
                 tableCallSize = value;
-                tableTotalPot += value;
+                Set_PlayerBetSize(tableNumber, value);
                 Set_NextTurn();
             }
         }
@@ -228,6 +231,7 @@ namespace Holdem
                 for (int i = 0; i < playerState.Length; i++)
                     if (Get_PlayerInGame(i))
                         playerState[i] = PlayerState.Wait;
+                tableCallSize = 0;
                 Set_GameAuto();
             }
 
@@ -267,10 +271,9 @@ namespace Holdem
 
                     for (int i = 0; i < Get_TablePlayerData.Length; i++)
                     {
-                        if (Get_TablePlayerData[i].isPlaying())
-                            playerState[i] = PlayerState.Wait;
-                        else
-                            playerState[i] = PlayerState.OutOfGame;
+                        if (Get_TablePlayerData[i].isPlaying()) playerState[i] = PlayerState.Wait;
+                        else                                    playerState[i] = PlayerState.OutOfGame;
+                        playerBetSize[i] = 0;
                     }
                     break;
                 case TableState.Hand:
@@ -676,7 +679,9 @@ namespace Holdem
             Update_PlayerUI();
             Update_CardPattern();
             Update_PlayerReset();
+            Update_PlayerBet();
             table_System_UI.Set_TableState(9 - Get_TablePlayerCount(), tableState != TableState.Wait);
+            table_System_UI.Set_TablePot(tableTotalPot);
         }
         public void Update_PlayerState()
         {
@@ -711,6 +716,15 @@ namespace Holdem
 
             for (int i = 0; i < table_Players.Length; i++)
                 table_Players[i].Action_Reset();
+        }
+        public void Update_PlayerBet()
+        {
+            if (tableStatePrev == tableState)
+                return;
+            tableStatePrev = tableState;
+
+            for (int i = 0; i < table_Players.Length; i++)
+                table_Players[i].Reset_Bet();
         }
         #endregion
         #region Networking

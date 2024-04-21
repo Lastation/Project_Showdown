@@ -20,9 +20,9 @@ namespace Holdem
         [UdonSynced] int playerId;
         [UdonSynced] int tablePlayerChip;
         [UdonSynced] bool isAction;
+        [UdonSynced] int betSize = 0;
 
         bool isTurn = false;
-        int bet = 0;
 
         #region Enter & Exit
         public void Enter_Table()
@@ -59,7 +59,7 @@ namespace Holdem
             isTurn = true;
             isAction = false;
             table_Player_UI.Set_Button_Color(isTurn);
-            table_Player_UI.Set_CallText(table_System.Get_TableCallSize() - bet);
+            table_Player_UI.Set_CallText(table_System.Get_TableCallSize() - betSize);
             Add_RaiseChipSize_Reset();
         }
         public void Action_Call()
@@ -76,14 +76,15 @@ namespace Holdem
 
             isTurn = false;
             isAction = false;
-            bet = 0;
+            betSize = 0;
             table_Player_UI.Set_Button_Color(isTurn);
 
-            if (mainSystem.Get_Data_Player().Get_Chip() <= table_System.Get_TableCallSize() - bet)
+            if (mainSystem.Get_Data_Player().Get_Chip() <= table_System.Get_TableCallSize() - betSize)
                 table_Player_UI.Set_CallText_Allin(mainSystem.Get_Data_Player().Get_Chip());
             else
-                table_Player_UI.Set_CallText(table_System.Get_TableCallSize() - bet);
+                table_Player_UI.Set_CallText(table_System.Get_TableCallSize() - betSize);
             Add_RaiseChipSize_Reset();
+            DoSync();
         }
         public void Action_Raise()
         {
@@ -107,10 +108,10 @@ namespace Holdem
                 if (mainSystem.Get_Data_Player().Get_Chip() == value)
                     mainSystem.Get_Data_Player().Pay_Chip(mainSystem.Get_Data_Player().Get_Chip());
                 else
-                    mainSystem.Get_Data_Player().Pay_Chip(actionChipSize - bet);
+                    mainSystem.Get_Data_Player().Pay_Chip(actionChipSize - betSize);
             }
 
-            bet = value == -1 ? 0 : actionChipSize;
+            betSize = value == -1 ? 0 : actionChipSize;
 
             isAction = true;
             isTurn = false;
@@ -135,16 +136,21 @@ namespace Holdem
                 return;
 
             if (isAdd)
-                actionChipSize += value;
+                actionChipSize += value + betSize;
             else
                 actionChipSize = table_System.Get_TableCallSize() + value;
 
-            actionChipSize = Mathf.Min(actionChipSize - bet, mainSystem.Get_Data_Player().Get_Chip());
+            actionChipSize = Mathf.Min(actionChipSize - betSize, mainSystem.Get_Data_Player().Get_Chip());
 
             if (mainSystem.Get_Data_Player().Get_Chip() <= actionChipSize)
                 table_Player_UI.Set_RaiseText_Allin(actionChipSize);
             else
                 table_Player_UI.Set_RaiseText(actionChipSize);
+            DoSync();
+        }
+        public void Reset_Bet()
+        {
+            betSize = 0;
             DoSync();
         }
         #endregion
@@ -177,6 +183,7 @@ namespace Holdem
         {
             Update_DisplayText();
             Update_Action();
+            Update_BetSize();
         }
         public void Update_DisplayText()
         {
@@ -188,6 +195,10 @@ namespace Holdem
             if (!Networking.IsOwner(table_System.gameObject)) return;
             table_System.Set_BetAction(tableNumber, actionChipSize);
         }
+        public void Update_BetSize()
+        {
+            table_Player_UI.Set_BetSize(betSize);
+        }
         public override void OnPlayerJoined(VRCPlayerApi player)
         {
             if (!Networking.IsOwner(gameObject)) return;
@@ -198,6 +209,7 @@ namespace Holdem
         {
             if (!Networking.IsOwner(gameObject)) return;
             if (player.playerId != playerId) return;
+            Action_Reset();
             displayName = "";
             playerId = 0;
 

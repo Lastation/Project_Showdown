@@ -1,9 +1,6 @@
-﻿
-using TMPro;
+﻿using TMPro;
 using UdonSharp;
 using UnityEngine;
-using VRC.SDKBase;
-using VRC.Udon;
 
 namespace Holdem
 {
@@ -13,11 +10,7 @@ namespace Holdem
 
         [SerializeField] TextMeshProUGUI text_Dealer;
         [SerializeField] TextMeshProUGUI text_TableState;
-
-        public void Update_UI()
-        {
-
-        }
+        [SerializeField] TextMeshProUGUI text_TablePot;
 
         public void Set_Dealer_Displayname(string value) => text_Dealer.text = $"Dealer : {value}";
         public void Set_TableState(int count, bool isProgress)
@@ -32,5 +25,6 @@ namespace Holdem
                     break;
             }
         }
+        public void Set_TablePot(int value) => text_TablePot.text = value == 0 ? "" : $"Table Pot : {value}";
     }
 }

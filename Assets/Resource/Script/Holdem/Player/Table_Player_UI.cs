@@ -11,7 +11,7 @@ namespace Holdem
         [SerializeField] TextMeshProUGUI text_DisplayName, text_TablePlayerChip;
         [SerializeField] TextMeshProUGUI text_Call, text_Raise;
         [SerializeField] TextMeshProUGUI text_Handrank;
-        [SerializeField] TextMeshPro text_state;
+        [SerializeField] TextMeshPro text_state, text_potSize;
         [SerializeField] GameObject obj_TablePlayerUI;
         [SerializeField] GameObject obj_TableJoin, obj_TableExit;
 
@@ -29,6 +29,7 @@ namespace Holdem
         }
 
         public void Set_StateText(PlayerState playerState)=> text_state.text = $"{s_playerState[(int)playerState]}";
+        public void Set_BetSize(int size) => text_potSize.text = size == 0 ? "" : $"{size}";
         public void Set_TablePlayerUI(bool value)
         {
             obj_TableJoin.SetActive(!value);
