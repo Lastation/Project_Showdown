@@ -186,7 +186,7 @@ namespace Holdem
                     Set_PlayerState(tableNumber);
                     Set_PlayerState(tableNumber, PlayerState.Raise);
                 }
-                else if (playerBetSize[tableNumber] == value)
+                else if (value == 0)
                 {
                     Set_PlayerState(tableNumber, PlayerState.Check);
                     Play_AudioClip(SE_Table_Index.Check);
