@@ -22,6 +22,7 @@ namespace Holdem
         [UdonSynced] bool isAction;
         [UdonSynced] int betSize = 0;
 
+        TableState tableState = TableState.Wait;
         bool isTurn = false;
 
         #region Enter & Exit
@@ -54,11 +55,19 @@ namespace Holdem
         }
         #endregion
         #region Turn
-        public void Set_Turn()
+        public int Get_BetSize() => betSize;
+        public void Set_Turn(TableState tableState)
         {
+            if (this.tableState != tableState)
+            {
+                this.tableState = tableState;
+                betSize = 0;
+            }
+
             isTurn = true;
             isAction = false;
             table_Player_UI.Set_Button_Color(isTurn);
+
             table_Player_UI.Set_CallText(table_System.Get_TableCallSize() - betSize);
             Add_RaiseChipSize_Reset();
         }
@@ -121,9 +130,9 @@ namespace Holdem
         }
         #endregion
         #region Raise
-        public void Add_RaiseChipSize_Reset() => Set_RaiseChipSize(table_System.Get_TableCallSize() * 1, false);
-        public void Add_RaiseChipSize_3x() => Set_RaiseChipSize(table_System.Get_TableCallSize() * 2, false);
-        public void Add_RaiseChipSize_4x() => Set_RaiseChipSize(table_System.Get_TableCallSize() * 3, false);
+        public void Add_RaiseChipSize_Reset() => Set_RaiseChipSize(table_System.Get_TableRaiseSize() * 1, false);
+        public void Add_RaiseChipSize_3x() => Set_RaiseChipSize(table_System.Get_TableRaiseSize() * 2, false);
+        public void Add_RaiseChipSize_4x() => Set_RaiseChipSize(table_System.Get_TableRaiseSize() * 3, false);
         public void Add_RaiseChipSize_100() => Set_RaiseChipSize(100, true);
         public void Add_RaiseChipSize_500() => Set_RaiseChipSize(500, true);
         public void Add_RaiseChipSize_1000() => Set_RaiseChipSize(1000, true);
@@ -138,7 +147,7 @@ namespace Holdem
             if (isAdd)
                 actionChipSize += value + betSize;
             else
-                actionChipSize = table_System.Get_TableCallSize() + value;
+                actionChipSize = table_System.Get_TableRaiseSize() + value;
 
             actionChipSize = Mathf.Min(actionChipSize - betSize, mainSystem.Get_Data_Player().Get_Chip());
 
@@ -146,11 +155,6 @@ namespace Holdem
                 table_Player_UI.Set_RaiseText_Allin(actionChipSize);
             else
                 table_Player_UI.Set_RaiseText(actionChipSize);
-            DoSync();
-        }
-        public void Reset_Bet()
-        {
-            betSize = 0;
             DoSync();
         }
         #endregion

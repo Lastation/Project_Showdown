@@ -74,12 +74,12 @@ namespace Holdem
         [UdonSynced] int tableTotalPot = 0;
         [UdonSynced] int tableCallSize = 200;
         [UdonSynced] int table_BB = 200;
-        [UdonSynced] int[] playerBetSize = new int[9];
         [UdonSynced] int[] table_Cards = new int[23];
         [UdonSynced] string[] s_handRank = new string[9];
         #endregion
         #region Static Variables
         [SerializeField] TableState tableStatePrev = TableState.Wait;
+        [SerializeField] int[] playerBetSize = new int[9];
         [SerializeField] MainSystem mainSystem;
         [SerializeField] AudioSource audioSource;
         [SerializeField] Table_Player[] table_Players;
@@ -96,6 +96,9 @@ namespace Holdem
         public void Set_TableState(TableState state)
         {
             tableState = state;
+            for (int i = 0; i < playerBetSize.Length; i++)
+                playerBetSize[i] = 0;
+
             DoSync();
         }
         public void Set_PlayerState(int idx, PlayerState state)
@@ -120,22 +123,16 @@ namespace Holdem
         }
         #endregion
         #region Chip Setting
-        public void Set_TableTotalPot(int value)
-        {
-            tableTotalPot = value;
-            DoSync();
-        }
         public void Set_TableCallSize(int value)
         {
             tableCallSize = value;
             DoSync();
         }
-        public int Get_TableCallSize() => tableCallSize == 0 ? table_BB : tableCallSize;
-        public int Get_TableBBSize() => table_BB;
+        public int Get_TableCallSize() => tableCallSize;
+        public int Get_TableRaiseSize() => tableCallSize == 0 ? table_BB : tableCallSize;
         public void Set_PlayerBetSize(int idx, int value)
         {
             playerBetSize[idx] = value;
-            DoSync();
         }
         #endregion
         #region Sound Effect
@@ -189,7 +186,7 @@ namespace Holdem
                     Set_PlayerState(tableNumber);
                     Set_PlayerState(tableNumber, PlayerState.Raise);
                 }
-                else if (playerBetSize[tableNumber] == tableCallSize)
+                else if (playerBetSize[tableNumber] == value)
                 {
                     Set_PlayerState(tableNumber, PlayerState.Check);
                     Play_AudioClip(SE_Table_Index.Check);
@@ -688,7 +685,7 @@ namespace Holdem
             for (int i = 0; i < table_Players.Length; i++)
             {
                 table_Players[i].Get_table_Player_UI().Set_StateText(playerState[i]);
-                if (playerState[i] == PlayerState.Turn) table_Players[i].Set_Turn();
+                if (playerState[i] == PlayerState.Turn) table_Players[i].Set_Turn(tableState);
             }
         }
         public void Update_HandRank()
@@ -722,9 +719,6 @@ namespace Holdem
             if (tableStatePrev == tableState)
                 return;
             tableStatePrev = tableState;
-
-            for (int i = 0; i < table_Players.Length; i++)
-                table_Players[i].Reset_Bet();
         }
         #endregion
         #region Networking
