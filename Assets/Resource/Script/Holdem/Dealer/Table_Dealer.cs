@@ -11,7 +11,6 @@ public class Table_Dealer : UdonSharpBehaviour
 {
     [UdonSynced] string displayName;
     [UdonSynced] int playerId;
-    [UdonSynced] int table_Pot;
 
     [SerializeField] Table_System table_System;
     [SerializeField] Table_Card table_Card;
@@ -43,7 +42,6 @@ public class Table_Dealer : UdonSharpBehaviour
         table_Card.Set_Pickupable(false);
         DoSync();
     }
-
     public void Set_Owner(VRCPlayerApi value)
     {
         if (value.IsOwner(gameObject)) return;
@@ -58,7 +56,6 @@ public class Table_Dealer : UdonSharpBehaviour
     {
         displayName = "";
         playerId = 0;
-        table_Pot = 0;
     }
     public void DoSync()
     {

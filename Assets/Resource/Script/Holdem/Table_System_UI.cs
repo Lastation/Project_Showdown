@@ -11,6 +11,9 @@ namespace Holdem
         [SerializeField] TextMeshProUGUI text_Dealer;
         [SerializeField] TextMeshProUGUI text_TableState;
         [SerializeField] TextMeshProUGUI text_TablePot;
+        [SerializeField] GameObject obj_kikerCheck;
+        [SerializeField] TextMeshProUGUI[] text_TablePlayerName;
+        [SerializeField] TextMeshProUGUI[] text_TablePlayerRank;
 
         public void Set_Dealer_Displayname(string value) => text_Dealer.text = $"Dealer : {value}";
         public void Set_TableState(int count, bool isProgress)
@@ -26,5 +29,8 @@ namespace Holdem
             }
         }
         public void Set_TablePot(int value) => text_TablePot.text = value == 0 ? "" : $"Table Pot : {value}";
+        public void Set_KikerCheck(bool value) => obj_kikerCheck.SetActive(value);
+        public void Set_PlayerName(string value, int index) => text_TablePlayerName[index].text = value;
+        public void Set_PlayerRank(string value, int index) => text_TablePlayerRank[index].text = value;
     }
 }

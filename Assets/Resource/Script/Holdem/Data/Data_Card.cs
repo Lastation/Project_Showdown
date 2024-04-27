@@ -21,7 +21,11 @@ namespace Holdem
             isBlind = true;
             Set_Pickupable(false);
         }
-        public void DoSync() => RequestSerialization();
+        public void DoSync()
+        {
+            Update_Blind(isBlind);
+            RequestSerialization();
+        }
         public override void OnDeserialization()
         {
             Update_Blind(isBlind);

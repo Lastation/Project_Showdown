@@ -22,16 +22,6 @@ namespace Holdem
 
         bool isPlayGame = false;
 
-        public void DoSync()
-        {
-            Update_UI();
-            RequestSerialization();
-        }
-        public override void OnDeserialization()
-        {
-            Update_UI();
-        }
-
         public void Start()
         {
             text_chip.text = chip.ToString();
@@ -45,17 +35,18 @@ namespace Holdem
         public void Pay_Chip(int value)
         {
             chip -= value;
-            text_chip.text = value.ToString();
-            DoSync();
+            text_chip.text = chip.ToString();
         }
+        public void Add_Chip(int value)
+        {
+            chip += value;
+            text_chip.text = chip.ToString();
+        }
+
         public int Get_Chip() => chip;
 
         public bool Get_isPlayGame() => isPlayGame;
-        public void Set_isPlayGame(bool value)
-        {
-            isPlayGame = value;
-            DoSync();
-        }
+        public void Set_isPlayGame(bool value) => isPlayGame = value;
 
         public void Set_cardPatternType(CardPatternType value) => cardPatternType = value;
         public CardPatternType Get_cardPatternType() => cardPatternType;
