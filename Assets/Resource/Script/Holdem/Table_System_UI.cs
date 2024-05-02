@@ -1,6 +1,7 @@
 ﻿using TMPro;
 using UdonSharp;
 using UnityEngine;
+using VRC.SDKBase;
 
 namespace Holdem
 {
@@ -14,6 +15,14 @@ namespace Holdem
         [SerializeField] GameObject obj_kikerCheck;
         [SerializeField] TextMeshProUGUI[] text_TablePlayerName;
         [SerializeField] TextMeshProUGUI[] text_TablePlayerRank;
+
+        public void FixedUpdate() => Set_Rotation();
+        private void Set_Rotation()
+        {
+            Vector3 relativePos = Networking.LocalPlayer.GetPosition() - transform.position;
+            Quaternion rotation = Quaternion.LookRotation(relativePos);
+            transform.rotation = rotation;
+        }
 
         public void Set_Dealer_Displayname(string value) => text_Dealer.text = $"Dealer : {value}";
         public void Set_TableState(int count, bool isProgress)

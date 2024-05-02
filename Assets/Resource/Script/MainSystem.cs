@@ -38,10 +38,13 @@ public class MainSystem : UdonSharpBehaviour
     Text[] text_handMenu_Button;
 
     private LocalizationType localizationType = LocalizationType.KOR;
+    int localizationIndex;
 
-    public void Set_Language_KOR() => Update_Language(LocalizationType.KOR);
-    public void Set_Language_JP() => Update_Language(LocalizationType.JP);
-    public void Set_Language_ENG() => Update_Language(LocalizationType.ENG);
+    public void Set_Language()
+    {
+        localizationIndex = localizationIndex + 1 >= (int)LocalizationType.Length ? 0 : localizationIndex + 1;
+        Update_Language((LocalizationType)localizationIndex);
+    }
 
     private void Start() => Update_Language(LocalizationType.KOR);
 

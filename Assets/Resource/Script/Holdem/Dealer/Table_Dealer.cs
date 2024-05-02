@@ -75,6 +75,8 @@ public class Table_Dealer : UdonSharpBehaviour
         table_System.Get_TableSystemUI().Set_Dealer_Displayname(displayName);
         table_Dealer_UI.Update_UI(displayName);
     }
+    #endregion
+    #region Networking
     public override void OnPlayerJoined(VRCPlayerApi player)
     {
         if (!Networking.IsOwner(gameObject)) return;
