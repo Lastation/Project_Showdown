@@ -43,6 +43,12 @@ namespace Holdem
             text_chip.text = chip.ToString();
         }
 
+        public void Reset_Chip()
+        {
+            chip = 20000;
+            text_chip.text = chip.ToString();
+        }
+
         public int Get_Chip() => chip;
 
         public bool Get_isPlayGame() => isPlayGame;

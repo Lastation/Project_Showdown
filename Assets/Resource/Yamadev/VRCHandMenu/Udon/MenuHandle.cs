@@ -77,7 +77,6 @@ namespace Yamadev.VRCHandMenu
 
         void Update()
         {
-            if (Input.anyKeyDown) Debug.Log(Input.inputString);
             if (Input.GetKeyDown(KeyCode.JoystickButton14) || Input.GetKeyDown(KeyCode.JoystickButton15)) _detectKey = KeyCode.JoystickButton14;
             if (!_isInitilized) return;
             if (!_showTip)

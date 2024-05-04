@@ -54,6 +54,7 @@ namespace Holdem
             tablePlayerChip = mainSystem.Get_Data_Player().Get_Chip();
             mainSystem.Get_Data_Player().Set_isPlayGame(true);
             table_Player_UI.Set_TablePlayerUI(true);
+            table_Player_UI.Set_TablePlayerUI_Height(true);
             table_Player_UI.Set_Button_Color(false);
             DoSync();
         }
@@ -64,6 +65,7 @@ namespace Holdem
             tablePlayerChip = 0;
             mainSystem.Get_Data_Player().Set_isPlayGame(false);
             table_Player_UI.Set_TablePlayerUI(false);
+            table_Player_UI.Set_TablePlayerUI_Height(false);
             table_Player_UI.Set_Button_Color(false);
             table_System.Set_ExitPlayer(tableNumber);
             DoSync();

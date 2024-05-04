@@ -12,8 +12,9 @@ namespace Holdem
         [SerializeField] TextMeshProUGUI text_Call, text_Raise;
         [SerializeField] TextMeshProUGUI text_Handrank;
         [SerializeField] TextMeshPro text_state, text_potSize;
-        [SerializeField] GameObject obj_TablePlayerUI;
+        [SerializeField] GameObject obj_UIJoin, obj_UIPlayer;
         [SerializeField] GameObject obj_TableJoin, obj_TableExit;
+        [SerializeField] GameObject obj_DisplayHide;
 
         [SerializeField] Image[] img_button;
         [SerializeField] Image[] img_cards;
@@ -28,17 +29,23 @@ namespace Holdem
             text_TablePlayerChip.text = displayName == "" ? "" : tablePlayerChip.ToString();
         }
 
-        public void Set_StateText(PlayerState playerState)=> text_state.text = $"{s_playerState[(int)playerState]}";
+        public void Set_StateText(PlayerState playerState) => text_state.text = $"{s_playerState[(int)playerState]}";
         public void Set_BetSize(int size) => text_potSize.text = size == 0 ? "" : $"{size}";
         public void Set_TablePlayerUI(bool value)
         {
             obj_TableJoin.SetActive(!value);
             obj_TableExit.SetActive(value);
-            obj_TablePlayerUI.SetActive(value);
+            obj_UIPlayer.SetActive(value);
+        }
+        public void Set_TablePlayerUI_Height(bool value)
+        {
+            float height = Networking.LocalPlayer.GetAvatarEyeHeightAsMeters() - 1.0f;
+            obj_UIJoin.transform.localPosition = new Vector3(obj_UIJoin.transform.localPosition.x, value ? height + 0.13f : 0.13f, obj_UIJoin.transform.localPosition.z);
+            obj_UIPlayer.transform.localPosition = new Vector3(obj_UIPlayer.transform.localPosition.x, value ? height : 0, obj_UIPlayer.transform.localPosition.z);
         }
         public void Set_Button_Color(bool isTurn)
         {
-            for (int i = 0; i <  img_button.Length; i++)
+            for (int i = 0; i < img_button.Length; i++)
                 img_button[i].color = isTurn ? color_button : Color.black;
         }
 
@@ -46,9 +53,12 @@ namespace Holdem
         public void Set_CallText_Allin(int value) => text_Call.text = $"all in [ {value} ]";
 
         public void Set_RaiseText(int value) => text_Raise.text = $"raise [ {value} ]";
-        public void Set_RaiseText_Allin(int value) => text_Raise.text = $"all in [ { value } ]";
+        public void Set_RaiseText_Allin(int value) => text_Raise.text = $"all in [ {value} ]";
 
-        public void Set_HandRankText(string value) => text_Handrank.text = value;
+        public void Set_HandRankText(int value)
+        {
+            text_Handrank.text = mainSystem.Get_HandRank(value);
+        }
         public void Set_CardImage(int[] table_Cards, int idx)
         {
             if (!Networking.IsOwner(gameObject))
@@ -61,6 +71,10 @@ namespace Holdem
             img_cards[4].sprite = mainSystem.Get_CardPattern()[table_Cards[20]];
             img_cards[5].sprite = mainSystem.Get_CardPattern()[table_Cards[21]];
             img_cards[6].sprite = mainSystem.Get_CardPattern()[table_Cards[22]];
+        }
+        public void Set_DisplayHide()
+        {
+            obj_DisplayHide.SetActive(!obj_DisplayHide.activeSelf);
         }
 
         public void Set_Owner(VRCPlayerApi value)

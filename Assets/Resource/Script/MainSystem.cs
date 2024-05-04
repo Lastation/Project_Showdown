@@ -3,6 +3,7 @@ using System;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
+using VRC.SDKBase;
 
 public enum handMenuIndex : int
 {
@@ -44,6 +45,7 @@ public class MainSystem : UdonSharpBehaviour
     {
         localizationIndex = localizationIndex + 1 >= (int)LocalizationType.Length ? 0 : localizationIndex + 1;
         Update_Language((LocalizationType)localizationIndex);
+        data_Player.Reset_Chip();
     }
 
     private void Start() => Update_Language(LocalizationType.KOR);
@@ -86,6 +88,57 @@ public class MainSystem : UdonSharpBehaviour
     public string s_AvatarLight => localization.s_AvatarLight[(int)localizationType];
     public string s_TableState_progress => localization.s_TableState_progress[(int)localizationType];
     public string s_TableState_wait => localization.s_TableState_wait[(int)localizationType];
+
+    public string s_HandSuit(int idx)
+    {
+        switch (idx)
+        {
+            case 0:
+                return "♠";
+            case 1:
+                return "♦";
+            case 2:
+                return "♥";
+            case 3:
+                return "♣";
+        };
+        return "";
+    }
+    public string s_HandNumber(int idx)
+    {
+        switch (idx)
+        {
+            case 0:
+                return "NULL";
+            case 1:
+                return "2";
+            case 2:
+                return "3";
+            case 3:
+                return "4";
+            case 4:
+                return "5";
+            case 5:
+                return "6";
+            case 6:
+                return "7";
+            case 7:
+                return "8";
+            case 8:
+                return "9";
+            case 9:
+                return "10";
+            case 10:
+                return "J";
+            case 11:
+                return "Q";
+            case 12:
+                return "K";
+            case 13:
+                return "A";
+        };
+        return "";
+    }
     public string s_HankRank(int idx)
     {
         switch (localizationType)
@@ -99,6 +152,14 @@ public class MainSystem : UdonSharpBehaviour
             default:
                 return null;
         }
+    }
+    public string Get_HandRank(int value)
+    {
+        int rank = value / 1000;
+        int number = (value % 1000) / 10;
+        int suit = value % 10;
+
+        return $"{s_HandSuit(suit)}{s_HandNumber(number)} {s_HankRank(rank)}";
     }
     #endregion
 
