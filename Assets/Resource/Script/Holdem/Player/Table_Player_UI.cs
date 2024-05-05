@@ -20,6 +20,31 @@ namespace Holdem
         [SerializeField] Image[] img_cards;
         [SerializeField] MainSystem mainSystem;
 
+        [SerializeField] Table_System table_System;
+        [SerializeField] TextMeshProUGUI[] text_raiseOption;
+        bool isDisplayToggle = false;
+        public void Set_DisplayToggle()
+        {
+            isDisplayToggle = !isDisplayToggle;
+
+            if (!isDisplayToggle)
+            {
+                text_raiseOption[0].text = "+100";
+                text_raiseOption[1].text = "+500";
+                text_raiseOption[2].text = "+1000";
+                text_raiseOption[3].text = "+5000";
+                text_raiseOption[4].text = "+10000";
+            }
+            else
+            {
+                text_raiseOption[0].text = $"+{100.0 / table_System.Get_TableBB()}BB";
+                text_raiseOption[1].text = $"+{500.0 / table_System.Get_TableBB()}BB";
+                text_raiseOption[2].text = $"+{1000.0 / table_System.Get_TableBB()}BB";
+                text_raiseOption[3].text = $"+{5000.0 / table_System.Get_TableBB()}BB";
+                text_raiseOption[4].text = $"+{10000.0 / table_System.Get_TableBB()}BB";
+            }
+        }
+
         Color color_button = new Color(0.0627451f, 0.509804f, 1, 1);
         string[] s_playerState = new string[8] { "", "Wait", "Turn", "Call", "Check", "Raise", "ALLIN", "Fold" };
 
@@ -49,11 +74,34 @@ namespace Holdem
                 img_button[i].color = isTurn ? color_button : Color.black;
         }
 
-        public void Set_CallText(int value) => text_Call.text = value == 0 ? $"check" : $"call [ {value} ]";
-        public void Set_CallText_Allin(int value) => text_Call.text = $"all in [ {value} ]";
-
-        public void Set_RaiseText(int value) => text_Raise.text = $"raise [ {value} ]";
-        public void Set_RaiseText_Allin(int value) => text_Raise.text = $"all in [ {value} ]";
+        public void Set_CallText(int value)
+        {
+            if (!isDisplayToggle)
+                text_Call.text = value == 0 ? $"check" : $"call [ {value} ]";
+            else
+                text_Call.text = value == 0 ? $"check" : $"call [ {(double)value / table_System.Get_TableBB()}BB ]";
+        }
+        public void Set_CallText_Allin(int value)
+        {
+            if (!isDisplayToggle)
+                text_Call.text = $"all in [ {value} ]";
+            else
+                text_Call.text = $"all in [ {(double)value / table_System.Get_TableBB()}BB ]";
+        }
+        public void Set_RaiseText(int value)
+        {
+            if (!isDisplayToggle)
+                text_Raise.text = $"raise [ {value} ]";
+            else
+                text_Raise.text = $"raise [ {(double)value / table_System.Get_TableBB()}BB ]";
+        }
+        public void Set_RaiseText_Allin(int value)
+        {
+            if (!isDisplayToggle)
+                text_Raise.text = $"all in [ {value} ]";
+            else
+                text_Raise.text = $"all in [ {(double)value / table_System.Get_TableBB()}BB ]";
+        }
 
         public void Set_HandRankText(int value)
         {

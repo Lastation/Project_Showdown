@@ -21,7 +21,7 @@ MonoBehaviour:
   compiledVersion: 2
   behaviourSyncMode: 0
   hasInteractEvent: 0
-  scriptID: 1305059106379871476
+  scriptID: 6608880672727703242
   serializationData:
     SerializedFormat: 2
     SerializedBytes: 
@@ -62,7 +62,7 @@ MonoBehaviour:
       Data: 3|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: Localization, Assembly-CSharp
+      Data: Holdem.Localization, Assembly-CSharp
     - Name: 
       Entry: 8
       Data: 
@@ -188,7 +188,7 @@ MonoBehaviour:
       Data: 12|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: LocalizationType, Assembly-CSharp
+      Data: Holdem.LocalizationType, Assembly-CSharp
     - Name: 
       Entry: 8
       Data: 

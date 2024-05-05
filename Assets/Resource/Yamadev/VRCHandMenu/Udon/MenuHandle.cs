@@ -1,9 +1,9 @@
 ﻿
+using Holdem;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
 using VRC.SDKBase;
-using static BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace Yamadev.VRCHandMenu
 {

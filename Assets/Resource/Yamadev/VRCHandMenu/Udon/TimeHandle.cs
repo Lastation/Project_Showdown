@@ -1,11 +1,9 @@
 ﻿
+using Holdem;
 using System;
-using System.Globalization;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
-using VRC.SDKBase;
-using VRC.Udon;
 
 
 namespace Yamadev.VRCHandMenu

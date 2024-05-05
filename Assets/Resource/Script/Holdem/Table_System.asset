@@ -572,7 +572,7 @@ MonoBehaviour:
       Data: 34|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: MainSystem, Assembly-CSharp
+      Data: Holdem.MainSystem, Assembly-CSharp
     - Name: 
       Entry: 8
       Data: 

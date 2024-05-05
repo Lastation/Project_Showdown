@@ -1667,6 +1667,13 @@ MonoBehaviour:
   - {fileID: 4493781703800335028}
   - {fileID: 7821009879725275849}
   mainSystem: {fileID: 0}
+  table_System: {fileID: 0}
+  text_raiseOption:
+  - {fileID: 2983422921083208674}
+  - {fileID: 6949616401089599822}
+  - {fileID: 5069056936517150873}
+  - {fileID: 4690051033503548308}
+  - {fileID: 2166770873347047183}
 --- !u!114 &8264066897963119331
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6630,7 +6637,19 @@ MonoBehaviour:
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 8264066897963119331}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SendCustomEvent
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: Set_DisplayToggle
+          m_BoolArgument: 0
+        m_CallState: 2
   m_IsOn: 0
 --- !u!1 &8469774904889155335
 GameObject:

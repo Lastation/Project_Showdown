@@ -1,8 +1,5 @@
-﻿using System.Data;
-using System.Runtime.Remoting.Messaging;
-using UdonSharp;
+﻿using UdonSharp;
 using UnityEngine;
-using UnityEngine.Playables;
 using VRC.SDKBase;
 
 namespace Holdem

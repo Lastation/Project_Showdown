@@ -1,8 +1,6 @@
-﻿using System;
-using UdonSharp;
+﻿using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
-using static UnityEngine.Rendering.DebugUI;
 
 namespace Holdem
 {
@@ -369,7 +367,7 @@ namespace Holdem
                     turn = Get_TurnSetting(table_TurnIndex + 1);
                     table_Players[turn].SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Set_PayBB");
                     playerBetSize[turn] = Get_TableBB();
-                    tableTotalPot += table_BB + table_BB / 2;
+                    tableTotalPot += Get_TableBB() + Get_TableSB();
                     break;
                 case TableState.Flop:
                     for (int i = 0; i < 3; i++)
@@ -718,15 +716,13 @@ namespace Holdem
         }
         public void Set_GameEnd()
         {
-            highHand = 0;
-            sidePotCalculate = 0;
-
             for (int i = 0; i < table_Players.Length; i++)
             {
                 if (!Get_PlayerInGame(i))
                     hands[i] = 0;
+                else
+                    hands[i] = (int)p_handRank[i] * 1000 + (int)p_handNumber[i] * 10 + 3 - (int)p_handSuit[i];
 
-                hands[i] = (int)p_handRank[i] * 1000 + (int)p_handNumber[i] * 10 + 3 - (int)p_handSuit[i];
                 table_System_UI.Set_PlayerRank("", i);
             }
 
@@ -735,6 +731,8 @@ namespace Holdem
 
         void KikerCheck()
         {
+            highHand = 0;
+
             if (tableTotalPot <= 0)
             {
                 for (int i = 0; i < hands.Length; i++)
@@ -746,13 +744,15 @@ namespace Holdem
             }
             else
             {
-                int index = 0;
+                int index = 0, count = 0;
                 bool isKikerCheck = false;
 
                 for (int i = 0; i < table_Players.Length; i++)
                 {
-                    if (tableSidePot[i] <= 0 || hands[i] == -1)
+                    if (tableSidePot[i] <= 0 || hands[i] < 0)
                         continue;
+
+                    count++;
 
                     if (highHand < hands[i])
                     {
@@ -764,7 +764,12 @@ namespace Holdem
                         isKikerCheck = true;
                 }
 
-                if (!isKikerCheck)
+                if (count == 0)
+                {
+                    _tableTotalPot = 0;
+                    KikerCheck();
+                }
+                else if (!isKikerCheck)
                 {
                     Set_SidePot(index);
                     KikerCheck();
@@ -789,6 +794,7 @@ namespace Holdem
             for (int i = 0; i < table_Players.Length; i++)
             {
                 if (i == index) continue;
+                if (hands[i] == -1) continue;
                 tableSidePot[i] = sidePotCalculate > tableSidePot[i] ? 0 : tableSidePot[i] - sidePotCalculate;
             }
             _tableTotalPot -= sidePotCalculate;
