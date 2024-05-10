@@ -14,7 +14,6 @@ namespace Holdem
     public class Table_Player : UdonSharpBehaviour
     {
         [SerializeField] int tableNumber = 0;
-        [SerializeField] MainSystem mainSystem = default;
         [SerializeField] Table_System table_System = default;
         [SerializeField] Table_Player_UI table_Player_UI = default;
         [SerializeField] Transform[] tf_cardPosition;
@@ -37,10 +36,10 @@ namespace Holdem
             if (playerId != 0)
                 return;
 
-            if (mainSystem.Get_Data_Player().Get_Chip() == 0)
+            if (table_System._mainSystem.Get_Data_Player().Get_Chip() == 0)
                 return;
 
-            if (mainSystem.Get_Data_Player().Get_isPlayGame())
+            if (table_System._mainSystem.Get_Data_Player().Get_isPlayGame())
                 return;
 
             Set_Owner(Networking.LocalPlayer);
@@ -48,8 +47,11 @@ namespace Holdem
 
             displayName = Networking.LocalPlayer.displayName;
             playerId = Networking.LocalPlayer.playerId;
-            tablePlayerChip = mainSystem.Get_Data_Player().Get_Chip();
-            mainSystem.Get_Data_Player().Set_isPlayGame(true);
+
+            tablePlayerChip = table_System._mainSystem.Get_Data_Player().Get_Chip();
+            table_System._mainSystem.Get_Data_Player().Set_isPlayGame(true);
+
+            table_System._mainSystem.table_Player_UI = table_Player_UI;
             table_Player_UI.Set_TablePlayerUI(true);
             table_Player_UI.Set_TablePlayerUI_Height(true);
             table_Player_UI.Set_Button_Color(false);
@@ -57,10 +59,15 @@ namespace Holdem
         }
         public void Exit_Table()
         {
+            if (!Networking.IsOwner(gameObject)) return;
+
             displayName = "";
             playerId = 0;
             tablePlayerChip = 0;
-            mainSystem.Get_Data_Player().Set_isPlayGame(false);
+
+            table_System._mainSystem.Get_Data_Player().Set_isPlayGame(false);
+            table_System._mainSystem.table_Player_UI = null;
+
             table_Player_UI.Set_TablePlayerUI(false);
             table_Player_UI.Set_TablePlayerUI_Height(false);
             table_Player_UI.Set_Button_Color(false);
@@ -73,8 +80,8 @@ namespace Holdem
         {
             if (!Networking.IsOwner(gameObject)) return;
 
-            mainSystem.Get_Data_Player().Add_Chip(table_System.Get_TablePot(tableNumber));
-            tablePlayerChip = mainSystem.Get_Data_Player().Get_Chip();
+            table_System._mainSystem.Get_Data_Player().Add_Chip(table_System.Get_TablePot(tableNumber));
+            tablePlayerChip = table_System._mainSystem.Get_Data_Player().Get_Chip();
             DoSync();
         }
         #endregion
@@ -86,8 +93,8 @@ namespace Holdem
             if (!Networking.IsOwner(gameObject)) return;
 
             betSize = table_System.Get_TableBB();
-            mainSystem.Get_Data_Player().Pay_Chip(table_System.Get_TableBB());
-            tablePlayerChip = mainSystem.Get_Data_Player().Get_Chip();
+            table_System._mainSystem.Get_Data_Player().Pay_Chip(table_System.Get_TableBB());
+            tablePlayerChip = table_System._mainSystem.Get_Data_Player().Get_Chip();
             tableBlindCheck = TableBlindCheck.BigBlind;
             DoSync();
         }
@@ -96,8 +103,8 @@ namespace Holdem
             if (!Networking.IsOwner(gameObject)) return;
 
             betSize = table_System.Get_TableSB();
-            mainSystem.Get_Data_Player().Pay_Chip(table_System.Get_TableSB());
-            tablePlayerChip = mainSystem.Get_Data_Player().Get_Chip();
+            table_System._mainSystem.Get_Data_Player().Pay_Chip(table_System.Get_TableSB());
+            tablePlayerChip = table_System._mainSystem.Get_Data_Player().Get_Chip();
             tableBlindCheck = TableBlindCheck.SmallBlind;
             DoSync();
         }
@@ -125,8 +132,8 @@ namespace Holdem
             isTurn = true;
             isAction = false;
             table_Player_UI.Set_Button_Color(isTurn);
-            if (mainSystem.Get_Data_Player().Get_Chip() <= table_System.Get_TableCallSize() - betSize)
-                table_Player_UI.Set_CallText_Allin(mainSystem.Get_Data_Player().Get_Chip());
+            if (table_System._mainSystem.Get_Data_Player().Get_Chip() <= table_System.Get_TableCallSize() - betSize)
+                table_Player_UI.Set_CallText_Allin(table_System._mainSystem.Get_Data_Player().Get_Chip());
             else
                 table_Player_UI.Set_CallText(table_System.Get_TableCallSize() - betSize);
             Add_RaiseChipSize_Reset();
@@ -138,7 +145,7 @@ namespace Holdem
 
             int value = table_System.Get_TableCallSize() - betSize;
 
-            if (value > mainSystem.Get_Data_Player().Get_Chip())    value = mainSystem.Get_Data_Player().Get_Chip();
+            if (value > table_System._mainSystem.Get_Data_Player().Get_Chip())    value = table_System._mainSystem.Get_Data_Player().Get_Chip();
             else                                                    value = table_System.Get_TableCallSize();
             Action_Sync(value);
         }
@@ -152,8 +159,8 @@ namespace Holdem
             betSize = 0;
             table_Player_UI.Set_Button_Color(isTurn);
 
-            if (mainSystem.Get_Data_Player().Get_Chip() <= table_System.Get_TableCallSize() - betSize)
-                table_Player_UI.Set_CallText_Allin(mainSystem.Get_Data_Player().Get_Chip());
+            if (table_System._mainSystem.Get_Data_Player().Get_Chip() <= table_System.Get_TableCallSize() - betSize)
+                table_Player_UI.Set_CallText_Allin(table_System._mainSystem.Get_Data_Player().Get_Chip());
             else
                 table_Player_UI.Set_CallText(table_System.Get_TableCallSize() - betSize);
             Add_RaiseChipSize_Reset();
@@ -178,10 +185,10 @@ namespace Holdem
             actionChipSize = value;
             if (actionChipSize != -1)
             {
-                if (mainSystem.Get_Data_Player().Get_Chip() == value)
-                    mainSystem.Get_Data_Player().Pay_Chip(value);
+                if (table_System._mainSystem.Get_Data_Player().Get_Chip() == value)
+                    table_System._mainSystem.Get_Data_Player().Pay_Chip(value);
                 else
-                    mainSystem.Get_Data_Player().Pay_Chip(actionChipSize - betSize);
+                    table_System._mainSystem.Get_Data_Player().Pay_Chip(actionChipSize - betSize);
             }
 
             betSize = value == -1 ? 0 : actionChipSize;
@@ -189,7 +196,7 @@ namespace Holdem
             isAction = true;
             isTurn = false;
             table_Player_UI.Set_Button_Color(isTurn);
-            tablePlayerChip = mainSystem.Get_Data_Player().Get_Chip();
+            tablePlayerChip = table_System._mainSystem.Get_Data_Player().Get_Chip();
             DoSync();
         }
         #endregion
@@ -202,7 +209,7 @@ namespace Holdem
         public void Add_RaiseChipSize_1000() => Set_RaiseChipSize(1000, true);
         public void Add_RaiseChipSize_5000() => Set_RaiseChipSize(5000, true);
         public void Add_RaiseChipSize_10000() => Set_RaiseChipSize(10000, true);
-        public void Add_RaiseChipSize_Allin() => Set_RaiseChipSize(mainSystem.Get_Data_Player().Get_Chip(), true);
+        public void Add_RaiseChipSize_Allin() => Set_RaiseChipSize(table_System._mainSystem.Get_Data_Player().Get_Chip(), true);
         public void Set_RaiseChipSize(int value, bool isAdd)
         {
             if (!isTurn)
@@ -213,9 +220,9 @@ namespace Holdem
             else
                 actionChipSize = table_System.Get_TableRaiseSize() + value;
 
-            actionChipSize = Mathf.Min(actionChipSize - betSize, mainSystem.Get_Data_Player().Get_Chip());
+            actionChipSize = Mathf.Min(actionChipSize - betSize, table_System._mainSystem.Get_Data_Player().Get_Chip());
 
-            if (mainSystem.Get_Data_Player().Get_Chip() <= actionChipSize)
+            if (table_System._mainSystem.Get_Data_Player().Get_Chip() <= actionChipSize)
                 table_Player_UI.Set_RaiseText_Allin(actionChipSize);
             else
                 table_Player_UI.Set_RaiseText(actionChipSize);

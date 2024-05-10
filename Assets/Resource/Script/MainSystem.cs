@@ -1,6 +1,7 @@
 ﻿using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.Rendering.DebugUI;
 namespace Holdem
 {
     public enum handMenuIndex : int
@@ -44,6 +45,7 @@ namespace Holdem
             Update_Language((LocalizationType)localizationIndex);
             data_Player.Reset_Chip();
         }
+        public LocalizationType Get_Language => localizationType;
 
         private void Start() => Update_Language(LocalizationType.KOR);
 
@@ -156,7 +158,7 @@ namespace Holdem
             int number = (value % 1000) / 10;
             int suit = value % 10;
 
-            return $"{s_HandSuit(suit)}{s_HandNumber(number)} {s_HankRank(rank)}";
+            return $"{s_HandSuit(3 - suit)}{s_HandNumber(number)} {s_HankRank(rank)}";
         }
         #endregion
 
@@ -189,6 +191,30 @@ namespace Holdem
         }
         public void Set_CardPattern_Basic() => data_Player.Set_cardPatternType(CardPatternType.Basic);
         public void Set_CardPattern_Simple() => data_Player.Set_cardPatternType(CardPatternType.Simple);
+        #endregion
+
+        #region PlayerConfig
+        /// Only use Player config local variables
+        public Table_Player_UI table_Player_UI { get; set; }
+        [SerializeField] Scrollbar scrollbar_display_height;
+        [SerializeField] Scrollbar scrollbar_collider_height;
+        [SerializeField] GameObject obj_collider_height;
+        public void Set_Display_Height()
+        {
+            if (table_Player_UI == null) return;
+            table_Player_UI.Set_TablePlayerUI_Height(true);
+        }
+        public float Get_Display_Height() => scrollbar_display_height.value - 0.5f + obj_collider_height.transform.localPosition.y;
+        public void Set_Collider_Height()
+        {
+            obj_collider_height.transform.localPosition = new Vector3( 0, scrollbar_collider_height.value * 0.2f, 0);
+
+            if (table_Player_UI == null) return;
+            table_Player_UI.Set_TablePlayerUI_Height(true);
+        }
+        public void Set_TableCollider_Height(float value)
+        {
+        }
         #endregion
     }
 }

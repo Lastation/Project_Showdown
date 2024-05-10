@@ -16,7 +16,7 @@ namespace Holdem
 
     public class Table_Card : UdonSharpBehaviour
     {
-        [SerializeField] MainSystem mainSystem;
+        [SerializeField] Table_System table_System;
         [SerializeField] Data_Card[] data_Card;
         [SerializeField] Transform[] tf_Position;
         int[] shuffleIndex = new int[52];
@@ -77,10 +77,10 @@ namespace Holdem
         }
         public void Set_CardPattern()
         {
-            if (cardPatternType == mainSystem.Get_Data_Player().Get_cardPatternType())
+            if (cardPatternType == table_System._mainSystem.Get_Data_Player().Get_cardPatternType())
                 return;
 
-            cardPatternType = mainSystem.Get_Data_Player().Get_cardPatternType();
+            cardPatternType = table_System._mainSystem.Get_Data_Player().Get_cardPatternType();
 
             for (int i = 0; i < data_Card.Length; i++)
                 data_Card[i].Set_Card_Pattern();

@@ -11,7 +11,7 @@ namespace Holdem
     {
         [SerializeField] VRCPickup vrcPickup;
         [SerializeField] SpriteRenderer sr_pattern;
-        [SerializeField] MainSystem mainSystem;
+        [SerializeField] Table_System table_System;
         [SerializeField] int i_cardIndex = 0;
 
         [UdonSynced] bool isBlind = false;
@@ -31,10 +31,10 @@ namespace Holdem
             Update_Blind(isBlind);
         }
 
-        public void Update_Blind(bool value) => sr_pattern.sprite = value ? null : mainSystem.Get_CardPattern()[i_cardIndex];
+        public void Update_Blind(bool value) => sr_pattern.sprite = value ? null : table_System._mainSystem.Get_CardPattern()[i_cardIndex];
         public void Set_Card_Pattern()
         {
-            sr_pattern.sprite = mainSystem.Get_CardPattern()[i_cardIndex];
+            sr_pattern.sprite = table_System._mainSystem.Get_CardPattern()[i_cardIndex];
         }
 
         public int Get_CardIndex() => i_cardIndex;

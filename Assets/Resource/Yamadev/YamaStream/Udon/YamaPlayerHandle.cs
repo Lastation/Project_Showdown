@@ -62,7 +62,7 @@ namespace Yamadev.YamaStream
                 _controller.Stopped = value;
             }
         }
-        public bool Loop 
+        public bool Loop
         { 
             get => _controller.Loop; 
             set

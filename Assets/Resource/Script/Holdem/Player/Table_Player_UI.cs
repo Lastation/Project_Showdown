@@ -18,7 +18,6 @@ namespace Holdem
 
         [SerializeField] Image[] img_button;
         [SerializeField] Image[] img_cards;
-        [SerializeField] MainSystem mainSystem;
 
         [SerializeField] Table_System table_System;
         [SerializeField] TextMeshProUGUI[] text_raiseOption;
@@ -65,9 +64,18 @@ namespace Holdem
         public void Set_TablePlayerUI_Height(bool value)
         {
             float height = Networking.LocalPlayer.GetAvatarEyeHeightAsMeters() - 1.0f;
-            obj_UIJoin.transform.localPosition = new Vector3(obj_UIJoin.transform.localPosition.x, value ? height + 0.13f : 0.13f, obj_UIJoin.transform.localPosition.z);
-            obj_UIPlayer.transform.localPosition = new Vector3(obj_UIPlayer.transform.localPosition.x, value ? height : 0, obj_UIPlayer.transform.localPosition.z);
+            obj_UIJoin.transform.localPosition =
+                new Vector3(
+                    obj_UIJoin.transform.localPosition.x, 
+                    value ? height + 0.13f + table_System._mainSystem.Get_Display_Height() : 0.13f, 
+                    obj_UIJoin.transform.localPosition.z);
+            obj_UIPlayer.transform.localPosition =
+                new Vector3(
+                    obj_UIPlayer.transform.localPosition.x, 
+                    value ? height + table_System._mainSystem.Get_Display_Height() : 0, 
+                    obj_UIPlayer.transform.localPosition.z);
         }
+
         public void Set_Button_Color(bool isTurn)
         {
             for (int i = 0; i < img_button.Length; i++)
@@ -105,20 +113,20 @@ namespace Holdem
 
         public void Set_HandRankText(int value)
         {
-            text_Handrank.text = mainSystem.Get_HandRank(value);
+            text_Handrank.text = table_System._mainSystem.Get_HandRank(value);
         }
         public void Set_CardImage(int[] table_Cards, int idx)
         {
             if (!Networking.IsOwner(gameObject))
                 return;
 
-            img_cards[0].sprite = mainSystem.Get_CardPattern()[table_Cards[0 + idx]];
-            img_cards[1].sprite = mainSystem.Get_CardPattern()[table_Cards[9 + idx]];
-            img_cards[2].sprite = mainSystem.Get_CardPattern()[table_Cards[18]];
-            img_cards[3].sprite = mainSystem.Get_CardPattern()[table_Cards[19]];
-            img_cards[4].sprite = mainSystem.Get_CardPattern()[table_Cards[20]];
-            img_cards[5].sprite = mainSystem.Get_CardPattern()[table_Cards[21]];
-            img_cards[6].sprite = mainSystem.Get_CardPattern()[table_Cards[22]];
+            img_cards[0].sprite = table_System._mainSystem.Get_CardPattern()[table_Cards[0 + idx]];
+            img_cards[1].sprite = table_System._mainSystem.Get_CardPattern()[table_Cards[9 + idx]];
+            img_cards[2].sprite = table_System._mainSystem.Get_CardPattern()[table_Cards[18]];
+            img_cards[3].sprite = table_System._mainSystem.Get_CardPattern()[table_Cards[19]];
+            img_cards[4].sprite = table_System._mainSystem.Get_CardPattern()[table_Cards[20]];
+            img_cards[5].sprite = table_System._mainSystem.Get_CardPattern()[table_Cards[21]];
+            img_cards[6].sprite = table_System._mainSystem.Get_CardPattern()[table_Cards[22]];
         }
         public void Set_DisplayHide()
         {

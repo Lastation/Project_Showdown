@@ -109,6 +109,8 @@ namespace Holdem
                 _tableTotalPot = value;
             }
         }
+
+        public MainSystem _mainSystem => mainSystem;
         #endregion
 
         /// Functions
@@ -302,7 +304,7 @@ namespace Holdem
         {
             for (int i = 0; i < table_Players.Length; i++)
                 if (table_Players[i].isPlaying() && table_Players[i].Get_TablePlayerChip() == 0)
-                        table_Players[i].SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Exit_Table");
+                    table_Players[i].SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Exit_Table");
 
             tableState = TableState.Wait;
             Set_GameAuto();

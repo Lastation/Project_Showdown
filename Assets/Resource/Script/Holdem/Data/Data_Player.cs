@@ -14,6 +14,7 @@ namespace Holdem
         Simple = 2,
     }
 
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     public class Data_Player : UdonSharpBehaviour
     {
         int chip = 20000;
