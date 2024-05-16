@@ -1,7 +1,6 @@
 ﻿using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEngine.Rendering.DebugUI;
 namespace Holdem
 {
     public enum handMenuIndex : int
@@ -27,6 +26,7 @@ namespace Holdem
         Win = 6
     }
 
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     public class MainSystem : UdonSharpBehaviour
     {
         #region Localization
@@ -35,6 +35,7 @@ namespace Holdem
 
         [SerializeField]
         Text[] text_handMenu_Button;
+
 
         private LocalizationType localizationType = LocalizationType.KOR;
         int localizationIndex;
@@ -191,6 +192,30 @@ namespace Holdem
         }
         public void Set_CardPattern_Basic() => data_Player.Set_cardPatternType(CardPatternType.Basic);
         public void Set_CardPattern_Simple() => data_Player.Set_cardPatternType(CardPatternType.Simple);
+
+        [SerializeField] Color[] color_card;
+        [SerializeField] Material[] mat_cardPattern;
+        [SerializeField] Slider slider_cardEmission;
+        private int cardColorPatternIndex = 2;
+
+        public void Set_Color_Pattern_White() => Set_Color(0);
+        public void Set_Color_Pattern_Blue() => Set_Color(1);
+        public void Set_Color_Pattern_Red() => Set_Color(2);
+        public void Set_Color_Pattern_Orange() => Set_Color(3);
+        public void Set_Color_Pattern_Green() => Set_Color(4);
+
+        public void Set_Color(int _cardColorPatternIndex)
+        {
+            cardColorPatternIndex = _cardColorPatternIndex;
+            Set_Color();
+        }
+
+        public void Set_Color()
+        {
+            mat_cardPattern[0].SetColor("_EmissionColor", color_card[cardColorPatternIndex] * slider_cardEmission.value);
+            mat_cardPattern[1].SetColor("_Color", color_card[cardColorPatternIndex] * slider_cardEmission.value);
+        }
+
         #endregion
 
         #region PlayerConfig
@@ -211,9 +236,6 @@ namespace Holdem
 
             if (table_Player_UI == null) return;
             table_Player_UI.Set_TablePlayerUI_Height(true);
-        }
-        public void Set_TableCollider_Height(float value)
-        {
         }
         #endregion
     }

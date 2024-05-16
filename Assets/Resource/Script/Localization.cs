@@ -109,7 +109,7 @@ namespace Holdem
         [ReadOnly]
         public string[] s_Card = new string[3]
         {
-        "카드설정",
+        "카드 설정",
         "カード設定",
         "Card settings"
         };

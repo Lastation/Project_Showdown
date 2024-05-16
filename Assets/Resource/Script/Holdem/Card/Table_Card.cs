@@ -66,7 +66,7 @@ namespace Holdem
             for (int i = 0; i < data_Card.Length; i++)
             {
                 data_Card[i].transform.rotation = tf_Position[(int)CardPosition.Deck].rotation;
-                data_Card[i].transform.position = tf_Position[(int)CardPosition.Deck].position + new Vector3(0.0f, 0.0255f - 0.0005f * shuffleIndex[i], 0.0f);
+                data_Card[i].transform.position = tf_Position[(int)CardPosition.Deck].position;
                 data_Card[i].Set_Blind(true);
             }
         }
@@ -87,23 +87,26 @@ namespace Holdem
         }
         public void Set_CardPosition(int index, Transform cardPosition, bool isBlind)
         {
-            data_Card[shuffleIndex[index]].transform.rotation = cardPosition.rotation;
-            data_Card[shuffleIndex[index]].transform.position = cardPosition.position;
-            data_Card[shuffleIndex[index]].Set_Blind(isBlind);
+            data_Card[index].transform.rotation = cardPosition.rotation;
+            data_Card[index].transform.position = cardPosition.position;
+            data_Card[index].Set_Card_Index(shuffleIndex[index]);
+            data_Card[index].Set_Blind(isBlind);
         }
+
         public void Set_CardPosition(int index, CardPosition cardPosition, bool isBlind)
         {
-            data_Card[shuffleIndex[index]].transform.rotation = tf_Position[(int)cardPosition].rotation;
-            data_Card[shuffleIndex[index]].transform.position = tf_Position[(int)cardPosition].position;
-            data_Card[shuffleIndex[index]].Set_Blind(isBlind);
+            data_Card[index].transform.rotation = tf_Position[(int)cardPosition].rotation;
+            data_Card[index].transform.position = tf_Position[(int)cardPosition].position;
+            data_Card[index].Set_Card_Index(shuffleIndex[index]);
+            data_Card[index].Set_Blind(isBlind);
         }
-        public void Set_CardRotation(int index) => data_Card[shuffleIndex[index]].Set_Rotation();
+        public void Set_CardRotation(int index) => data_Card[index].Set_Rotation();
 
         public void Set_Blind(int index, bool isBlind)
         {
-            data_Card[Get_CardIndex(index)].Set_Blind(isBlind);
+            data_Card[index].Set_Blind(isBlind);
         }
-        public int Get_CardIndex(int index) => shuffleIndex[index];
+        public int Get_CardIndex(int index) => data_Card[index].Get_CardIndex();
         public int Get_Seed() => seed;
 
         public void Set_Owner(VRCPlayerApi value)

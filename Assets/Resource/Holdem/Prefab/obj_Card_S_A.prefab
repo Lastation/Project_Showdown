@@ -50,7 +50,7 @@ Rigidbody:
   serializedVersion: 4
   m_Mass: 1
   m_Drag: Infinity
-  m_AngularDrag: Infinity
+  m_AngularDrag: 0
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -100,13 +100,13 @@ MonoBehaviour:
   m_Script: {fileID: 1804438810, guid: 661092b4961be7145bfbe56e1e62337b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MomentumTransferMethod: 1
-  DisallowTheft: 0
+  MomentumTransferMethod: 0
+  DisallowTheft: 1
   ExactGun: {fileID: 0}
   ExactGrip: {fileID: 0}
   allowManipulationWhenEquipped: 0
   orientation: 0
-  AutoHold: 0
+  AutoHold: 2
   InteractionText: 
   UseText: Pickup
   useEventBroadcastType: 0
@@ -139,7 +139,7 @@ MonoBehaviour:
   SynchronizePosition: 0
   AllowCollisionOwnershipTransfer: 0
   Reliable: 0
-  _syncMethod: 2
+  _syncMethod: 3
   serializedProgramAsset: {fileID: 11400000, guid: bf3ebd58414a03e419c45a680507c7af,
     type: 2}
   programSource: {fileID: 11400000, guid: 1e66bdeff4849ed4a827726dcbd31e55, type: 2}
@@ -172,7 +172,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 0
+    SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects: []
     SerializedBytesString: 
@@ -183,6 +183,8 @@ MonoBehaviour:
   _udonSharpBackingUdonBehaviour: {fileID: 1134383284495445753}
   vrcPickup: {fileID: 3401520069878067023}
   sr_pattern: {fileID: 6357150824769062983}
+  table_System: {fileID: 0}
+  i_cardIndex: 0
 --- !u!210 &1698953529894341367
 SortingGroup:
   m_ObjectHideFlags: 0
