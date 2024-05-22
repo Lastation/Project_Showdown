@@ -8,7 +8,7 @@ using VRC.SDKBase;
 namespace Yamadev.YamaStream
 {
     [RequireComponent(typeof(BaseVRCVideoPlayer))]
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     public class VideoPlayerHandle : UdonSharpBehaviour
     {
         [SerializeField] VideoPlayerType _videoPlayerType;

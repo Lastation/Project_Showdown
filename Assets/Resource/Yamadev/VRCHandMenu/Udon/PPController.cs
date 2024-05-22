@@ -8,7 +8,7 @@ using VRC.Udon;
 
 namespace Yamadev.VRCHandMenu
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     public class PPController : UdonSharpBehaviour
     {
         [SerializeField]

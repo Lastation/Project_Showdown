@@ -7,7 +7,7 @@ using VRC.SDK3.Components.Video;
 
 namespace Yamadev.YamaStream
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     public class DebugInfo : Listener
     {
         [SerializeField] Controller _controller;

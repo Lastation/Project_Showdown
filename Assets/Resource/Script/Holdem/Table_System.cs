@@ -408,7 +408,7 @@ namespace Holdem
                         }
                     }
                     Set_TableState(TableState.Wait);
-                    obj_turnArrow.transform.position = Vector3.down;
+                    obj_turnArrow.transform.position = transform.position + Vector3.down;
                     Set_GameEnd();
                     break;
             }

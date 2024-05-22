@@ -9,6 +9,8 @@ namespace Holdem
         ENG = 2,
         Length,
     }
+
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     public class Localization : UdonSharpBehaviour
     {
         [ReadOnly]

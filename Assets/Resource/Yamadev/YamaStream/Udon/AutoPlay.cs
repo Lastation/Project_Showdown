@@ -5,7 +5,7 @@ using VRC.SDKBase;
 
 namespace Yamadev.YamaStream
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     public class AutoPlay : UdonSharpBehaviour
     {
         [SerializeField] Controller _controller;

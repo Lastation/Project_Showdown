@@ -7,7 +7,7 @@ using VRC.SDKBase;
 
 namespace Yamadev.VRCHandMenu
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     public class MenuHandle : UdonSharpBehaviour
     {
         [Header("Main")]

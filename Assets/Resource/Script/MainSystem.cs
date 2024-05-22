@@ -36,7 +36,6 @@ namespace Holdem
         [SerializeField]
         Text[] text_handMenu_Button;
 
-
         private LocalizationType localizationType = LocalizationType.KOR;
         int localizationIndex;
 
@@ -232,7 +231,7 @@ namespace Holdem
         public float Get_Display_Height() => scrollbar_display_height.value - 0.5f + obj_collider_height.transform.localPosition.y;
         public void Set_Collider_Height()
         {
-            obj_collider_height.transform.localPosition = new Vector3( 0, scrollbar_collider_height.value * 0.2f, 0);
+            obj_collider_height.transform.localPosition = new Vector3( 0, scrollbar_collider_height.value * 0.5f, 0);
 
             if (table_Player_UI == null) return;
             table_Player_UI.Set_TablePlayerUI_Height(true);

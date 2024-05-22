@@ -7,7 +7,7 @@ using VRC.SDKBase;
 
 namespace Yamadev.YamaStream
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     public class YamaPlayerHandle : Listener
     {
         [SerializeField] Controller _controller;

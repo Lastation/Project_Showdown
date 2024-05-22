@@ -21,6 +21,7 @@ namespace Holdem
 
         [SerializeField] Table_System table_System;
         [SerializeField] TextMeshProUGUI[] text_raiseOption;
+        [SerializeField] TextMeshPro text_spectator;
         bool isDisplayToggle = false;
         public void Set_DisplayToggle()
         {
@@ -51,10 +52,22 @@ namespace Holdem
         {
             text_DisplayName.text = displayName == "" ? "Join" : displayName;
             text_TablePlayerChip.text = displayName == "" ? "" : tablePlayerChip.ToString();
+            Set_Player_Spectator();
         }
 
-        public void Set_StateText(PlayerState playerState) => text_state.text = $"{s_playerState[(int)playerState]}";
-        public void Set_BetSize(int size) => text_potSize.text = size == 0 ? "" : $"{size}";
+        public void Set_StateText(PlayerState playerState)
+        {
+            text_state.text = $"{s_playerState[(int)playerState]}";
+            Set_Player_Spectator();
+        }
+        public void Set_BetSize(int size)
+        {
+            text_potSize.text = size == 0 ? "" : $"{size}";
+            Set_Player_Spectator();
+        }
+
+        public void Set_Player_Spectator() => text_spectator.text = $"{text_DisplayName.text}\n{text_state.text}\n{text_potSize.text}";
+
         public void Set_TablePlayerUI(bool value)
         {
             obj_TableJoin.SetActive(!value);

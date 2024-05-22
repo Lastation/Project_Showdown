@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace Yamadev.VRCHandMenu
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     public class TimeHandle : UdonSharpBehaviour
     {
         [SerializeField]

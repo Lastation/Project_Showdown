@@ -6,7 +6,7 @@ using VRC.Udon;
 
 namespace Yamadev.VRCHandMenu
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     public class Page : UdonSharpBehaviour
     {
         [SerializeField]

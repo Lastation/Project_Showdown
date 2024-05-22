@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Yamadev.YamaStream
 {
     [RequireComponent(typeof(Renderer))]
-    [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     public class YamaPlayerScreen : UdonSharpBehaviour
     {
         [SerializeField] YamaPlayerHandle _playerHandle;
