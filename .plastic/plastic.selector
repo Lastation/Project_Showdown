@@ -1,0 +1,4 @@
+repository "Project_Showdown@Katsune@cloud"
+  path "/"
+    br "/main"
+    co "/main"

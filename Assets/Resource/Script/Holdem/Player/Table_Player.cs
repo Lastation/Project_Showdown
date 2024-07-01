@@ -1,6 +1,7 @@
 ﻿using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
+using static UnityEngine.Rendering.DebugUI;
 
 namespace Holdem
 {
@@ -28,25 +29,31 @@ namespace Holdem
 
         TableState tableState = TableState.Wait;
         bool isTurn = false;
+        float fTurnTimer;
         TableBlindCheck tableBlindCheck = TableBlindCheck.Default;
 
         #region Enter & Exit
         public void Enter_Table()
         {
-            if (playerId != 0)
-                return;
+            VRCPlayerApi localPlayer = Networking.LocalPlayer;
 
-            if (table_System._mainSystem.Get_Data_Player().Get_Chip() == 0)
+            if (playerId != 0)
+            {
+                if (Networking.IsOwner(localPlayer, table_System.gameObject))
+                return;
+            }
+
+            if (table_System._mainSystem.Get_Data_Player().Get_Chip() < 200)
                 return;
 
             if (table_System._mainSystem.Get_Data_Player().Get_isPlayGame())
                 return;
 
-            Set_Owner(Networking.LocalPlayer);
-            table_Player_UI.Set_Owner(Networking.LocalPlayer);
+            Set_Owner(localPlayer);
+            table_Player_UI.Set_Owner(localPlayer);
 
-            displayName = Networking.LocalPlayer.displayName;
-            playerId = Networking.LocalPlayer.playerId;
+            displayName = localPlayer.displayName;
+            playerId = localPlayer.playerId;
 
             tablePlayerChip = table_System._mainSystem.Get_Data_Player().Get_Chip();
             table_System._mainSystem.Get_Data_Player().Set_isPlayGame(true);
@@ -55,6 +62,7 @@ namespace Holdem
             table_Player_UI.Set_TablePlayerUI(true);
             table_Player_UI.Set_TablePlayerUI_Height(true);
             table_Player_UI.Set_Button_Color(false);
+            isAction = false;
             DoSync();
         }
         public void Exit_Table()
@@ -71,7 +79,10 @@ namespace Holdem
             table_Player_UI.Set_TablePlayerUI(false);
             table_Player_UI.Set_TablePlayerUI_Height(false);
             table_Player_UI.Set_Button_Color(false);
-            table_System.Set_ExitPlayer(tableNumber);
+
+            table_System.SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Set_ExitCheck");
+            isTurn = false;
+
             DoSync();
         }
         #endregion
@@ -79,7 +90,50 @@ namespace Holdem
         public void Add_EndGamePot()
         {
             if (!Networking.IsOwner(gameObject)) return;
+            if (actionChipSize == -1) return;
 
+            HandRanking rank = (HandRanking)(table_Player_UI.handRank / 1000);
+            int result = 0;
+
+            switch (rank)
+            {
+                case HandRanking.HighCard:
+                    result = 1;
+                    break;
+                case HandRanking.OnePair:
+                    result = 1;
+                    break;
+                case HandRanking.TwoPair:
+                    result = 2;
+                    break;
+                case HandRanking.ThreeOfAKind:
+                    result = 3;
+                    break;
+                case HandRanking.Straight:
+                case HandRanking.BackStraight:
+                case HandRanking.Mountain:
+                    result = 5;
+                    break;
+                case HandRanking.Flush:
+                    result = 13;
+                    break;
+                case HandRanking.FullHouse:
+                    result = 21;
+                    break;
+                case HandRanking.FourOfAKind:
+                    result = 34;
+                    break;
+                case HandRanking.StraightFlush:
+                    result = 55;
+                    break;
+                case HandRanking.RoyalFlush:
+                    result = 100;
+                    break;
+            }
+            if (table_System.Get_TablePot(tableNumber) > 0)
+                result *= 2;
+
+            table_System._mainSystem.Get_Data_Player().Add_Coin(result);
             table_System._mainSystem.Get_Data_Player().Add_Chip(table_System.Get_TablePot(tableNumber));
             tablePlayerChip = table_System._mainSystem.Get_Data_Player().Get_Chip();
             DoSync();
@@ -122,14 +176,16 @@ namespace Holdem
             {
                 case TableBlindCheck.SmallBlind:
                     betSize = table_System.Get_TableSB();
+                    tableBlindCheck = TableBlindCheck.Default;
                     break;
                 case TableBlindCheck.BigBlind:
                     betSize = table_System.Get_TableBB();
+                    tableBlindCheck = TableBlindCheck.Default;
                     break;
             }
-            tableBlindCheck = TableBlindCheck.Default;
 
             isTurn = true;
+            fTurnTimer = 0;
             isAction = false;
             table_Player_UI.Set_Button_Color(isTurn);
             if (table_System._mainSystem.Get_Data_Player().Get_Chip() <= table_System.Get_TableCallSize() - betSize)
@@ -138,6 +194,23 @@ namespace Holdem
                 table_Player_UI.Set_CallText(table_System.Get_TableCallSize() - betSize);
             Add_RaiseChipSize_Reset();
         }
+        public void FixedUpdate()
+        {
+            table_Player_UI.Set_Rotation();
+
+            if (!Networking.IsOwner(gameObject))
+                return;
+
+            if (!isTurn)
+                return;
+
+            fTurnTimer += Time.deltaTime;
+            table_Player_UI.Update_Timer(fTurnTimer);
+
+            if (fTurnTimer > 30.0f)
+                Exit_Table();
+        }
+
         public void Action_Call()
         {
             if (!isTurn)
@@ -145,8 +218,8 @@ namespace Holdem
 
             int value = table_System.Get_TableCallSize() - betSize;
 
-            if (value > table_System._mainSystem.Get_Data_Player().Get_Chip())    value = table_System._mainSystem.Get_Data_Player().Get_Chip();
-            else                                                    value = table_System.Get_TableCallSize();
+            if (value > table_System._mainSystem.Get_Data_Player().Get_Chip())  value = table_System._mainSystem.Get_Data_Player().Get_Chip();
+            else                                                                value = table_System.Get_TableCallSize();
             Action_Sync(value);
         }
         public void Action_Reset()
@@ -290,8 +363,7 @@ namespace Holdem
             Action_Reset();
             displayName = "";
             playerId = 0;
-
-            if (Networking.IsOwner(table_System.gameObject)) table_System.Set_ExitPlayer(tableNumber);
+            if (Networking.IsOwner(table_System.gameObject)) table_System.Set_ExitPlayer();
         }
         public void Set_Owner(VRCPlayerApi value)
         {

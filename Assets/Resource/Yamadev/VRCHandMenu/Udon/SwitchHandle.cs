@@ -21,12 +21,16 @@ namespace Yamadev.VRCHandMenu
 
         public void SetActive()
         {
+            if (!targetObject) return;
+
             targetObject.SetActive(true); 
             _icon.color = _activeColor;
         }
 
         public void SetInactive()
         {
+            if (!targetObject) return;
+
             targetObject.SetActive(false); 
             _icon.color = _inactiveColor;
         }

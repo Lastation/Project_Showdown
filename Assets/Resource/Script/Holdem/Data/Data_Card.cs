@@ -13,14 +13,15 @@ namespace Holdem
         [SerializeField] SpriteRenderer sr_pattern;
         [SerializeField] Table_System table_System;
         [UdonSynced] int i_cardIndex = 0;
-
         [UdonSynced] bool isBlind = false;
         private bool prevBlind;
-        
+        private Rigidbody rb_card;
+
         public void Start()
         {
             isBlind = true;
             Set_Pickupable(false);
+            rb_card = GetComponent<Rigidbody>();
         }
         public void DoSync()
         {
@@ -31,6 +32,8 @@ namespace Holdem
         {
             Update_Blind(isBlind);
         }
+
+        public void Set_Velocity() => rb_card.velocity = Vector3.zero;
 
         public void Update_Blind(bool value)
         {

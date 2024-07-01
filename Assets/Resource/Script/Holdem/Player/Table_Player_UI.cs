@@ -11,6 +11,7 @@ namespace Holdem
         [SerializeField] TextMeshProUGUI text_DisplayName, text_TablePlayerChip;
         [SerializeField] TextMeshProUGUI text_Call, text_Raise;
         [SerializeField] TextMeshProUGUI text_Handrank;
+        [SerializeField] TextMeshProUGUI text_Time;
         [SerializeField] TextMeshPro text_state, text_potSize;
         [SerializeField] GameObject obj_UIJoin, obj_UIPlayer;
         [SerializeField] GameObject obj_TableJoin, obj_TableExit;
@@ -22,6 +23,20 @@ namespace Holdem
         [SerializeField] Table_System table_System;
         [SerializeField] TextMeshProUGUI[] text_raiseOption;
         [SerializeField] TextMeshPro text_spectator;
+
+        [UdonSynced]
+        int _handRank = 0;
+        public int handRank
+        {
+            get
+            {
+                return _handRank;
+            }
+            set
+            {
+                _handRank = value;
+            }
+        }
         bool isDisplayToggle = false;
         public void Set_DisplayToggle()
         {
@@ -48,6 +63,22 @@ namespace Holdem
         Color color_button = new Color(0.0627451f, 0.509804f, 1, 1);
         string[] s_playerState = new string[8] { "", "Wait", "Turn", "Call", "Check", "Raise", "ALLIN", "Fold" };
 
+        public void Update_Timer(float time)
+        {
+            text_Time.text = (30.0f - time).ToString("0.0");
+            if (time > 25) text_Time.color = Color.red;
+            else if (time > 20) text_Time.color = Color.yellow;
+            else if (time > 10) text_Time.color = Color.white;
+            else text_Time.color = Color.green;
+        }
+
+        public void Set_Rotation()
+        {
+            Vector3 relativePos = Networking.LocalPlayer.GetPosition() - transform.position;
+            Quaternion rotation = Quaternion.LookRotation(relativePos);
+            text_Handrank.transform.rotation = rotation;
+        }
+
         public void Update_UI(string displayName, int tablePlayerChip)
         {
             text_DisplayName.text = displayName == "" ? "Join" : displayName;
@@ -55,9 +86,27 @@ namespace Holdem
             Set_Player_Spectator();
         }
 
-        public void Set_StateText(PlayerState playerState)
+        public void Set_StateText(PlayerState playerState, TableState tableState)
         {
-            text_state.text = $"{s_playerState[(int)playerState]}";
+            if (text_TablePlayerChip.text == "")
+            {
+                text_state.text = "";
+                text_state.color = Color.white;
+                return;
+            }
+
+            if (tableState == TableState.Wait && playerState != PlayerState.OutOfGame && playerState != PlayerState.Fold)
+                text_state.text = table_System._mainSystem.Get_HandRank(handRank);
+            else
+                text_state.text = $"{s_playerState[(int)playerState]}";
+
+            if (text_state.text == "Fold")
+                text_state.color = Color.red;
+            else if (text_state.text == "Wait")
+                text_state.color = Color.yellow;
+            else
+                text_state.color = Color.white;
+
             Set_Player_Spectator();
         }
         public void Set_BetSize(int size)
@@ -66,7 +115,16 @@ namespace Holdem
             Set_Player_Spectator();
         }
 
-        public void Set_Player_Spectator() => text_spectator.text = $"{text_DisplayName.text}\n{text_state.text}\n{text_potSize.text}";
+        public void Set_Player_Spectator()
+        {
+            text_spectator.text = $"{text_DisplayName.text}\n{text_state.text}\n{text_potSize.text}";
+            if (text_state.text == "Fold")
+                text_spectator.color = Color.red;
+            else if (text_state.text == "Wait")
+                text_spectator.color = Color.yellow;
+            else
+                text_spectator.color = Color.white;
+        }
 
         public void Set_TablePlayerUI(bool value)
         {
@@ -126,7 +184,8 @@ namespace Holdem
 
         public void Set_HandRankText(int value)
         {
-            text_Handrank.text = table_System._mainSystem.Get_HandRank(value);
+            handRank = value;
+            text_Handrank.text = table_System._mainSystem.Get_HandRank(handRank);
         }
         public void Set_CardImage(int[] table_Cards, int idx)
         {
