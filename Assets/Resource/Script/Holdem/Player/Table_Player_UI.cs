@@ -76,7 +76,7 @@ namespace Holdem
         {
             Vector3 relativePos = Networking.LocalPlayer.GetPosition() - transform.position;
             Quaternion rotation = Quaternion.LookRotation(relativePos);
-            text_Handrank.transform.rotation = rotation;
+            text_state.gameObject.transform.rotation = rotation;
         }
 
         public void Update_UI(string displayName, int tablePlayerChip)

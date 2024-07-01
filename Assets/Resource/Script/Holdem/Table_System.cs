@@ -265,13 +265,16 @@ namespace Holdem
             {
                 if (Get_TablePlayerData[i].Get_DisplayName() != "")
                     continue;
+                else
+                {
+                    if (table_TurnIndex == i)
+                    {
+                        Set_TurnIndex(table_TurnIndex, true);
+                        break;
+                    }
+                }
                 playerState[i] = PlayerState.OutOfGame;
                 handRank[i] = 0;
-                if (table_TurnIndex == i)
-                {
-                    Set_TurnIndex(table_TurnIndex, true);
-                    break;
-                }
             }
             DoSync();
         }

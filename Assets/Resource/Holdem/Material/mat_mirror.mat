@@ -101,6 +101,7 @@ Material:
     - _StencilReadMask: 255
     - _StencilWriteMask: 255
     - _StencilZFail: 0
+    - _StereoEnabled: 0
     - _Transparency: 1
     - _UVSec: 0
     - _ZWrite: 0

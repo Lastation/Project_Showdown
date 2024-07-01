@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: OpenGroupPage
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 75abd5f0600e89441bfa3ec459c29537,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 028b5df8b440f194d99432495ccda762,
     type: 2}
   udonAssembly: 
   assemblyError: 
-  sourceCsScript: {fileID: 11500000, guid: dd70a55eed1fd3742b903ae212b88081, type: 3}
+  sourceCsScript: {fileID: 11500000, guid: 86795512332112f4a8874ccfcaffa75c, type: 3}
   scriptVersion: 2
   compiledVersion: 2
   behaviourSyncMode: 0

@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: UdonChipsInteractGain Udon C# Program Asset
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 28780739e19c4a1438d3f9da8fb17ff4,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: a8735874be9292d4ca6dde6ac4598b5e,
     type: 2}
   udonAssembly: 
   assemblyError: 
-  sourceCsScript: {fileID: 11500000, guid: 23b09b25e90000341ab3fd2acf26d2e8, type: 3}
+  sourceCsScript: {fileID: 11500000, guid: a5b3a03a3c34533409007c8e6a5589c4, type: 3}
   scriptVersion: 2
   compiledVersion: 2
   behaviourSyncMode: 0

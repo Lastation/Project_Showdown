@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: UdonChipsMoneyText
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 9bc35f91fba1fe84598ddc6c071db3f3,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 48b1c6e820cd0d747a859630d615d5ab,
     type: 2}
   udonAssembly: 
   assemblyError: 
-  sourceCsScript: {fileID: 11500000, guid: 68ba3ba221515fe43be76d8e98d671a5, type: 3}
+  sourceCsScript: {fileID: 11500000, guid: eaa7d949645dfdf45a9a9052214ef117, type: 3}
   scriptVersion: 2
   compiledVersion: 2
   behaviourSyncMode: 0

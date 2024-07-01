@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: UdonChipsObjectPool
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 253b1cae2ca94654e98f8f6c5583e4dc,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: de434fa57fd640e4cbb1a07d4b4fc691,
     type: 2}
   udonAssembly: 
   assemblyError: 
-  sourceCsScript: {fileID: 11500000, guid: 460e81b28f99df24dbac639567b7f109, type: 3}
+  sourceCsScript: {fileID: 11500000, guid: 3b4cebbf60b40594a8e4e0683c697071, type: 3}
   scriptVersion: 2
   compiledVersion: 2
   behaviourSyncMode: 0

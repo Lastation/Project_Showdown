@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: UdonChipsRanking
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: d6065b5e96bd6ee40b7681118a5ef82a,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 000a570c24288cf4b838179fbdee7ff8,
     type: 2}
   udonAssembly: 
   assemblyError: 
-  sourceCsScript: {fileID: 11500000, guid: c5312c2852550eb42938ec821a1f0d09, type: 3}
+  sourceCsScript: {fileID: 11500000, guid: c629daccd868a3b41a434adcaef78b26, type: 3}
   scriptVersion: 2
   compiledVersion: 2
   behaviourSyncMode: 4

@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: UdonChipsInstantShop_ToggleActive
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 5d751277df4d42940b290ad51738381e,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 1efefc8697eaf624d86223a931aaaa65,
     type: 2}
   udonAssembly: 
   assemblyError: 
-  sourceCsScript: {fileID: 11500000, guid: 593c25f20d818644ca21caea68425dc6, type: 3}
+  sourceCsScript: {fileID: 11500000, guid: 9fc9bf749a2cb78499fb5d09a1af5494, type: 3}
   scriptVersion: 2
   compiledVersion: 2
   behaviourSyncMode: 0

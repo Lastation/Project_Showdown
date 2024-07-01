@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: UdonChipsShopAnimator
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 8bb068801010711468c9210a9a7d45d5,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 05e9284b931ad99439ae3fd63ed3f759,
     type: 2}
   udonAssembly: 
   assemblyError: 
-  sourceCsScript: {fileID: 11500000, guid: 2d7ee00291c57a547be3e8bd91c68207, type: 3}
+  sourceCsScript: {fileID: 11500000, guid: 413d43577a108524da85da58472aac6d, type: 3}
   scriptVersion: 2
   compiledVersion: 2
   behaviourSyncMode: 0

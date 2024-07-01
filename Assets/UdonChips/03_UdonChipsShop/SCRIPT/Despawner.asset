@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: Despawner
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 7eda452f695e7934f84e44a4a0f922e6,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 26e02ef25e34fdb4eb6a6fc26c8621a5,
     type: 2}
   udonAssembly: 
   assemblyError: 
-  sourceCsScript: {fileID: 11500000, guid: 44496af4a91748845849d86627a288c1, type: 3}
+  sourceCsScript: {fileID: 11500000, guid: f3b5844f06cc5074997e328888cee284, type: 3}
   scriptVersion: 2
   compiledVersion: 2
   behaviourSyncMode: 0

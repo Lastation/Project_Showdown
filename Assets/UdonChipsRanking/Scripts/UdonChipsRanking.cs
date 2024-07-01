@@ -125,7 +125,6 @@ public class UdonChipsRanking : UdonSharpBehaviour
 
         if (player == Networking.LocalPlayer)
             players[myPlayerId].ResetUdonChips();
-        players[myPlayerId].PlayerName = "";
         UpdatePlayerName();
     }
     public void UpdatePlayerName()

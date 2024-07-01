@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: UdonChipsTouchToGet
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: f71ece76f1f348c43a8c03c4cd772889,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 87bfcfecf95218945aac72c8d02d3403,
     type: 2}
   udonAssembly: 
   assemblyError: 
-  sourceCsScript: {fileID: 11500000, guid: ee67a2df325dbc5468a8d329396baefc, type: 3}
+  sourceCsScript: {fileID: 11500000, guid: e810675c78e3d00458dae26d68df34bb, type: 3}
   scriptVersion: 2
   compiledVersion: 2
   behaviourSyncMode: 0

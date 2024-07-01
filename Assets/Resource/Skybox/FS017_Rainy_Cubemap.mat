@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: FS017_Rainy_Cubemap
-  m_Shader: {fileID: 104, guid: 0000000000000000f000000000000000, type: 0}
+  m_Shader: {fileID: 103, guid: 0000000000000000f000000000000000, type: 0}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -24,33 +24,37 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BackTex:
-        m_Texture: {fileID: 2800000, guid: 4676adb9ddb10894aa1ab60ff29414f5, type: 3}
+        m_Texture: {fileID: 2800000, guid: 07f20a55f9544734b9a70fd1205b7b08, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DownTex:
-        m_Texture: {fileID: 2800000, guid: 613ad9ff0287a7c4d86a5d958e4313b3, type: 3}
+        m_Texture: {fileID: 2800000, guid: 38f6b42c5afc5164dab6eaf4dd50b185, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _FrontTex:
-        m_Texture: {fileID: 2800000, guid: 73b8b1e94ef7fd841aaca0854f7252ec, type: 3}
+        m_Texture: {fileID: 2800000, guid: 3846e1d7db540ff4680f19a53ad6d0df, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _LeftTex:
-        m_Texture: {fileID: 2800000, guid: a9e6ef292edb96e418e6e0fd44a2ef1b, type: 3}
+        m_Texture: {fileID: 2800000, guid: 2f3cac2a9aa989a45ae46b58317de2e7, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _RightTex:
-        m_Texture: {fileID: 2800000, guid: e4051bfa471d28d49bcbdd95f4265a75, type: 3}
+        m_Texture: {fileID: 2800000, guid: 0307152b290cbab4dbd14b3bade130fe, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Tex:
+        m_Texture: {fileID: 8900000, guid: 826134d8621807e4bab300d6f741f3b3, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _UpTex:
-        m_Texture: {fileID: 2800000, guid: 68ed1953a000a7744adfde23d5aba737, type: 3}
+        m_Texture: {fileID: 2800000, guid: d7df189dd39faa544be2766428cccdc9, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Exposure: 1.2
+    - _Exposure: 0.9
     - _Rotation: 0
     m_Colors:
-    - _Tint: {r: 0.08245818, g: 0.09977357, b: 0.16037738, a: 0.5}
+    - _Tint: {r: 0.031505868, g: 0.0478462, b: 0.11320752, a: 0.5}
   m_BuildTextureStacks: []
