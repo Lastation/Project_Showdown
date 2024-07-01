@@ -32,11 +32,10 @@ namespace Holdem
             if (!Networking.IsOwner(gameObject))
                 return;
 
-            for (int i = 0; i < data_Card.Length; i++)
-            {
+            for (int i = 0; i < shuffleIndex.Length; i++)
                 shuffleIndex[i] = i;
+            for (int i = 0; i < data_Card.Length; i++)
                 data_Card[i].Set_Blind(true);
-            }
         }
         public void Reset_Card()
         {
@@ -51,9 +50,9 @@ namespace Holdem
             seed = Random.Range(int.MinValue, int.MaxValue);
             Random.InitState(seed);
 
-            for (int i = 0; i < data_Card.Length; i++)
+            for (int i = 0; i < shuffleIndex.Length; i++)
             {
-                int rand = Random.Range(i, data_Card.Length);
+                int rand = Random.Range(i, shuffleIndex.Length);
                 int tmp = shuffleIndex[i];
                 shuffleIndex[i] = shuffleIndex[rand];
                 shuffleIndex[rand] = tmp;
@@ -67,6 +66,7 @@ namespace Holdem
             {
                 data_Card[i].transform.rotation = tf_Position[(int)CardPosition.Deck].rotation;
                 data_Card[i].transform.position = tf_Position[(int)CardPosition.Deck].position;
+                data_Card[i].Set_Velocity();
                 data_Card[i].Set_Blind(true);
             }
         }

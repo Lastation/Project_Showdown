@@ -12,23 +12,29 @@ namespace Holdem
         [SerializeField] Table_System table_System;
         [SerializeField] Table_Card table_Card;
         [SerializeField] Table_Dealer_UI table_Dealer_UI;
+        [SerializeField] Instance_Data instance_Data;
 
 
         #region Enter & Exit
         public void Enter_Table()
         {
+            VRCPlayerApi localPlayer = Networking.LocalPlayer;
+
             if (displayName != "")
                 return;
 
-            Set_Owner(Networking.LocalPlayer);
-            table_System.Set_Owner(Networking.LocalPlayer);
-            table_Dealer_UI.Set_Owner(Networking.LocalPlayer);
-            table_Card.Set_Owner(Networking.LocalPlayer);
+            if (!instance_Data.DealerCheck(localPlayer.displayName))
+                return;
 
-            displayName = Networking.LocalPlayer.displayName;
-            playerId = Networking.LocalPlayer.playerId;
+            Set_Owner(localPlayer);
+            table_System.Set_Owner(localPlayer);
+            table_Dealer_UI.Set_Owner(localPlayer);
+            table_Card.Set_Owner(localPlayer);
+
+            displayName = localPlayer.displayName;
+            playerId = localPlayer.playerId;
             table_Dealer_UI.Set_TableDealerUI(true);
-            table_Card.Set_Pickupable(false);
+            table_Card.Set_Pickupable(true);
             table_Card.Init_Card();
             DoSync();
         }

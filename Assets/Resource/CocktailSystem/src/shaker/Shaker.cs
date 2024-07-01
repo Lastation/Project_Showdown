@@ -25,7 +25,6 @@ namespace CocktailSystem.src.shaker
         [SerializeField] private AudioClip[] audioClipMizu;
         [SerializeField] private MainSystem mainSystem;
         
-        
         private Liqueur[] materials;
         private CocktailInfo cocktailInfo;
         private Vector3 oldPosition;

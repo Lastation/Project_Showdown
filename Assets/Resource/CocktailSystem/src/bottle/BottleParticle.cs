@@ -23,9 +23,7 @@ namespace CocktailSystem.src.bottle
 
             var majorCol = other.GetComponent<MajorCol>();
             if (majorCol == null)
-            {
                 return;
-            }
 
             // パーティクル一個目でリキュールの情報をセット
             if (!majorCol.GetMajor().GetLiqueurFlag())

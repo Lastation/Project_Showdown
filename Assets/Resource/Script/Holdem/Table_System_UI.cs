@@ -16,6 +16,7 @@ namespace Holdem
         [SerializeField] TextMeshProUGUI[] text_TablePlayerName;
         [SerializeField] TextMeshProUGUI[] text_TablePlayerRank;
         [SerializeField] TextMeshPro text_spectator;
+        [SerializeField] TextMeshPro[] text_TablePlayerPot;
 
         public void FixedUpdate() => Set_Rotation();
         private void Set_Rotation()
@@ -50,6 +51,11 @@ namespace Holdem
         }
 
         public void Set_Table_Spectator() => text_spectator.text = $"{text_Dealer.text}\n{text_TableState.text}\n{text_TablePot.text}";
+
+        public void Set_Table_PlayerPot(int[] tableSidePot)
+        {
+            for (int i = 0; i < text_TablePlayerPot.Length; i++) text_TablePlayerPot[i].text = $"totalPot : {tableSidePot[i]}";
+        }
 
         public void Set_KikerCheck(bool value) => obj_kikerCheck.SetActive(value);
         public void Set_PlayerName(string value, int index) => text_TablePlayerName[index].text = value;

@@ -1,4 +1,5 @@
 ﻿using UdonSharp;
+using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.UI;
 namespace Holdem
@@ -26,6 +27,12 @@ namespace Holdem
         Win = 6
     }
 
+    public enum SE_Table_Type : int
+    {
+        Basic = 0,
+        Type1 = 1,
+    }
+
     [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     public class MainSystem : UdonSharpBehaviour
     {
@@ -46,6 +53,11 @@ namespace Holdem
             data_Player.Reset_Chip();
         }
         public LocalizationType Get_Language => localizationType;
+
+        public AudioClip Get_Table_Audio(SE_Table_Type type, SE_Table_Index index)
+        {
+            return null;
+        }
 
         private void Start() => Update_Language(LocalizationType.KOR);
 
@@ -154,6 +166,9 @@ namespace Holdem
         }
         public string Get_HandRank(int value)
         {
+            if (value == 0)
+                return "";
+
             int rank = value / 1000;
             int number = (value % 1000) / 10;
             int suit = value % 10;
@@ -195,7 +210,7 @@ namespace Holdem
         [SerializeField] Color[] color_card;
         [SerializeField] Material[] mat_cardPattern;
         [SerializeField] Slider slider_cardEmission;
-        private int cardColorPatternIndex = 2;
+        private int cardColorPatternIndex = 0;
 
         public void Set_Color_Pattern_White() => Set_Color(0);
         public void Set_Color_Pattern_Blue() => Set_Color(1);
@@ -237,5 +252,14 @@ namespace Holdem
             table_Player_UI.Set_TablePlayerUI_Height(true);
         }
         #endregion
+
+        [SerializeField]
+        Material rainShader;
+
+        public void Set_RainShader_OFF() => rainShader.SetFloat("_Stop", 0);
+        public void Set_RainShader_ON() => rainShader.SetFloat("_Stop", 1);
+
+        [SerializeField]
+        AnimationCurve ScoreCurve;
     }
 }

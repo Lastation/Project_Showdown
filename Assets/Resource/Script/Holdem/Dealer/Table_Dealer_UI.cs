@@ -11,7 +11,7 @@ namespace Holdem
         [SerializeField] TextMeshProUGUI text_DisplayName;
         [SerializeField] GameObject obj_TableDealerUI;
         [SerializeField] GameObject obj_TableJoin, obj_TableExit;
-
+        
         public void Update_UI(string displayName)
         {
             text_DisplayName.text = displayName == "" ? "Join" : displayName;
