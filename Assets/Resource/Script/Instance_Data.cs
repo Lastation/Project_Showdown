@@ -40,8 +40,8 @@ public class Instance_Data : UdonSharpBehaviour
             if (sDisplayNames[i] == "")
             {
                 sDisplayNames[i] = player.displayName;
-                iChips[i] = 20000;
-                iCoins[i] = 0;
+                iChips[i] = 0;
+                iCoins[i] = 40;
                 break;
             }
         }
@@ -108,8 +108,8 @@ public class Instance_Data : UdonSharpBehaviour
             }
         }
 
-        data_Player.Set_Chip(20000);
-        data_Player.Set_Coin(0);
+        data_Player.Set_Chip(0);
+        data_Player.Set_Coin(40);
     }
     #endregion
 }

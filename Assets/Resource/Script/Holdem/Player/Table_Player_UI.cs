@@ -150,7 +150,14 @@ namespace Holdem
         public void Set_Button_Color(bool isTurn)
         {
             for (int i = 0; i < img_button.Length; i++)
-                img_button[i].color = isTurn ? color_button : Color.black;
+            {
+                if (i == 2) // fold
+                    img_button[i].color = isTurn ? Color.red : Color.black;
+                else if (i == 3) // reset
+                    img_button[i].color = isTurn ? Color.yellow : Color.black;
+                else
+                    img_button[i].color = isTurn ? color_button : Color.black;
+            }
         }
 
         public void Set_CallText(int value)

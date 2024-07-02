@@ -30,8 +30,8 @@ namespace Holdem
         OnePair,
         TwoPair,
         ThreeOfAKind,
-        Straight,
         BackStraight,
+        Straight,
         Mountain,
         Flush,
         FullHouse,
@@ -479,6 +479,7 @@ namespace Holdem
         HandNumber[] p_handNumber = new HandNumber[9];
         HandSuit[] p_handSuit = new HandSuit[9];
         int[] hands = new int[9];
+        int[] kiker = new int[9];
         int highHand = 0;
 
         public void Set_HandRank()
@@ -539,12 +540,31 @@ namespace Holdem
                 }
             }
 
+            int count = 4;
+            for (int i = 0; i < pair[0]; i++)
+            {
+                kiker[playerID] += (int)HandNumber.Ace;
+                count--;
+            }
+            for (int i = pair.Length - 1; i > 1; i--)
+            {
+                if (count == 0)
+                    break;
+
+                for (int j = 0; j < pair[i]; j++)
+                {
+                    kiker[playerID] += pair[i];
+                    count--;
+                }
+            }
+
             if (isRoyalFlush(hand, playerID)) return HandRanking.RoyalFlush;
             if (isStraightFlush(hand, playerID)) return HandRanking.StraightFlush;
             if (isFourOfAKind(pair, playerID)) return HandRanking.FourOfAKind;
             if (isFullHouse(hand, pair, playerID)) return HandRanking.FullHouse;
             if (isFlush(hand, suit, playerID)) return HandRanking.Flush;
             if (isMountain(hand, pair, playerID)) return HandRanking.Mountain;
+            if (isBackStraight(hand, pair, playerID)) return HandRanking.BackStraight;
             if (isStraight(hand, pair, playerID)) return HandRanking.Straight;
             if (isThreeOfAKind(hand, pair, playerID)) return HandRanking.ThreeOfAKind;
             if (isTwoPair(hand, pair, playerID)) return HandRanking.TwoPair;
@@ -628,6 +648,19 @@ namespace Holdem
         private bool isMountain(bool[] hand, int[] pair, int playerID)
         {
             if (pair[0] != 0 && pair[9] != 0 && pair[10] != 0 && pair[11] != 0 && pair[12] != 0)
+            {
+                if (hand[00] == true) p_handSuit[playerID] = HandSuit.Spade;
+                else if (hand[13] == true) p_handSuit[playerID] = HandSuit.Diamond;
+                else if (hand[26] == true) p_handSuit[playerID] = HandSuit.Heart;
+                else if (hand[39] == true) p_handSuit[playerID] = HandSuit.Clover;
+                p_handNumber[playerID] = HandNumber.Ace;
+                return true;
+            }
+            return false;
+        }
+        private bool isBackStraight(bool[] hand, int[] pair, int playerID)
+        {
+            if (pair[0] != 0 && pair[1] != 0 && pair[2] != 0 && pair[3] != 0 && pair[4] != 0)
             {
                 if (hand[00] == true) p_handSuit[playerID] = HandSuit.Spade;
                 else if (hand[13] == true) p_handSuit[playerID] = HandSuit.Diamond;
@@ -752,16 +785,29 @@ namespace Holdem
         }
         public void Set_GameEnd()
         {
+            DoSync();
             for (int i = 0; i < table_Players.Length; i++)
             {
                 if (!Get_PlayerInGame(i))
                     hands[i] = 0;
                 else
-                    hands[i] = (int)p_handRank[i] * 1000 + (int)p_handNumber[i] * 10;
+                {
+                    switch(p_handRank[i])
+                    {
+                        case HandRanking.Mountain:
+                        case HandRanking.Straight:
+                        case HandRanking.BackStraight:
+                        case HandRanking.StraightFlush:
+                        case HandRanking.RoyalFlush:
+                        case HandRanking.Flush:
+                            kiker[i] = 0;
+                            break;
+                    }
 
+                    hands[i] = (int)p_handRank[i] * 10000 + (int)p_handNumber[i] * 100 + kiker[i];
+                }
                 table_System_UI.Set_PlayerRank("", i);
             }
-
             KikerCheck();
         }
 
@@ -1012,14 +1058,7 @@ namespace Holdem
         {
             if (!Networking.IsOwner(gameObject)) return;
 
-            for (int i = 0; i < playerState.Length; i++)
-                if (Get_TablePlayerData[i].Get_DisplayName() == player.displayName)
-                {
-                    Set_PlayerState(i, PlayerState.OutOfGame);
-
-                    if (table_TurnIndex == i)
-                        Set_TurnIndex(i);
-                }
+            Set_ExitCheck();
             DoSync();
         }
         #endregion

@@ -50,7 +50,6 @@ namespace Holdem
         {
             localizationIndex = localizationIndex + 1 >= (int)LocalizationType.Length ? 0 : localizationIndex + 1;
             Update_Language((LocalizationType)localizationIndex);
-            data_Player.Reset_Chip();
         }
         public LocalizationType Get_Language => localizationType;
 
@@ -246,7 +245,7 @@ namespace Holdem
         public float Get_Display_Height() => scrollbar_display_height.value - 0.5f + obj_collider_height.transform.localPosition.y;
         public void Set_Collider_Height()
         {
-            obj_collider_height.transform.localPosition = new Vector3( 0, scrollbar_collider_height.value * 0.5f, 0);
+            obj_collider_height.transform.localPosition = new Vector3( 0, scrollbar_collider_height.value, 0);
 
             if (table_Player_UI == null) return;
             table_Player_UI.Set_TablePlayerUI_Height(true);

@@ -56,7 +56,13 @@ namespace Holdem
         public void Add_Coin(int value) => coin += value;
         public void Set_Coin(int value) => coin = value;
 
-        public void Reset_Chip() => chip = 20000;
+        public void Rebine_Chip()
+        {
+            if (coin < 20 || chip > 200)
+                return;
+            coin -= 20;
+            chip = 20000;
+        }
 
         public int Get_Chip() => chip;
 
