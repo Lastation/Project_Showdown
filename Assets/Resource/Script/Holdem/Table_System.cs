@@ -854,13 +854,7 @@ namespace Holdem
                     Set_SidePot(index);
                 else
                 {
-                    table_System_UI.Set_KikerCheck(true);
-                    for (int i = 0; i < table_Players.Length; i++)
-                    {
-                        if (highHand != hands[i])
-                            continue;
-                        table_System_UI.Set_PlayerRank($"{mainSystem.Get_HandRank(handRank[i])} / {Get_CardName(table_Cards[i])}, {Get_CardName(table_Cards[i + 9])}", i);
-                    }
+                    Add_EndGamePot_Chap();
                 }
             }
 
@@ -888,23 +882,6 @@ namespace Holdem
             for (int i = 0; i < table_Players.Length; i++)
                 if (table_Players[i].isPlaying() && playerState[i] != PlayerState.OutOfGame)
                     table_Players[i].SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Add_EndGamePot");
-        }
-        public void Add_EndGamePot_P1() => Add_EndGamePot(0);
-        public void Add_EndGamePot_P2() => Add_EndGamePot(1);
-        public void Add_EndGamePot_P3() => Add_EndGamePot(2);
-        public void Add_EndGamePot_P4() => Add_EndGamePot(3);
-        public void Add_EndGamePot_P5() => Add_EndGamePot(4);
-        public void Add_EndGamePot_P6() => Add_EndGamePot(5);
-        public void Add_EndGamePot_P7() => Add_EndGamePot(6);
-        public void Add_EndGamePot_P8() => Add_EndGamePot(7);
-        public void Add_EndGamePot_P9() => Add_EndGamePot(8);
-        public void Add_EndGamePot(int value)
-        {
-            if (!table_Players[value].isPlaying()) return;
-            if (hands[value] != highHand) return;
-
-            table_System_UI.Set_KikerCheck(false);
-            Set_SidePot(value);
         }
         public void Add_EndGamePot_Chap()
         {
@@ -938,6 +915,12 @@ namespace Holdem
             _tableTotalPot -= maxSidePot;
             table_System_UI.Set_KikerCheck(false);
             KikerCheck();
+        }
+        #endregion
+        #region GiveChip
+        public void Add_Chip_P1()
+        {
+
         }
         #endregion
 
