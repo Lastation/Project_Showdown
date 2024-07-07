@@ -26,6 +26,7 @@ namespace Holdem
             {
                 udonChips.chips = value;
                 text_chip.text = chip.ToString();
+                chipSystem.ApplyText(chip, coin);
             }
         }
         public int coin
@@ -35,12 +36,14 @@ namespace Holdem
             {
                 udonChips.coin = value;
                 text_coin.text = coin.ToString();
+                chipSystem.ApplyText(chip, coin);
             }
         }
         [SerializeField] CardPatternType cardPatternType;
         [SerializeField] Text text_chip;
         [SerializeField] Text text_coin;
         [SerializeField] UdonChips udonChips;
+        [SerializeField] ChipSystem chipSystem;
 
         bool isPlayGame = false;
 

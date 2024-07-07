@@ -30,9 +30,7 @@ namespace Holdem
         OnePair,
         TwoPair,
         ThreeOfAKind,
-        BackStraight,
         Straight,
-        Mountain,
         Flush,
         FullHouse,
         FourOfAKind,
@@ -165,33 +163,50 @@ namespace Holdem
         public void Set_PlayerBetSize(int idx, int value) => playerBetSize[idx] = value;
         #endregion
         #region Sound Effect
-        public void Play_AudioClip_Fold() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table(SE_Table_Index.Fold));
-        public void Play_AudioClip_DrawCard() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table(SE_Table_Index.DrawCard));
-        public void Play_AudioClip_Turn() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table(SE_Table_Index.Turn));
-        public void Play_AudioClip_Call() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table(SE_Table_Index.Call));
-        public void Play_AudioClip_Check() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table(SE_Table_Index.Check));
-        public void Play_AudioClip_Raise() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table(SE_Table_Index.Raise));
+        public void Play_AudioClip_Fold_Basic() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table_Basic(SE_Table_Index.Fold));
+        public void Play_AudioClip_DrawCard_Basic() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table_Basic(SE_Table_Index.DrawCard));
+        public void Play_AudioClip_Turn_Basic() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table_Basic(SE_Table_Index.Turn));
+        public void Play_AudioClip_Call_Basic() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table_Basic(SE_Table_Index.Call));
+        public void Play_AudioClip_Check_Basic() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table_Basic(SE_Table_Index.Check));
+        public void Play_AudioClip_Raise_Basic() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table_Basic(SE_Table_Index.Raise));
+        public void Play_AudioClip_Fold_Type1() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table_Type1(SE_Table_Index.Fold));
+        public void Play_AudioClip_DrawCard_Type1() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table_Type1(SE_Table_Index.DrawCard));
+        public void Play_AudioClip_Turn_Type1() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table_Type1(SE_Table_Index.Turn));
+        public void Play_AudioClip_Call_Type1() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table_Type1(SE_Table_Index.Call));
+        public void Play_AudioClip_Check_Type1() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table_Type1(SE_Table_Index.Check));
+        public void Play_AudioClip_Raise_Type1() => audioSource.PlayOneShot(mainSystem.Get_AudioClip_Table_Type1(SE_Table_Index.Raise));
         public void Play_AudioClip(SE_Table_Index index)
         {
+            string type = "Basic";
+            switch(table_Players[table_TurnIndex].Get_VoiceType())
+            {
+                case SE_Table_Type.Basic:
+                    type = "Basic";
+                    break;
+                case SE_Table_Type.Type1:
+                    type = "Type1";
+                    break;
+            }
+
             switch(index)
             {
                 case SE_Table_Index.Fold:
-                    SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Play_AudioClip_Fold");
+                    SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Play_AudioClip_Fold_" + type);
                     return;
                 case SE_Table_Index.DrawCard:
-                    SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Play_AudioClip_DrawCard");
+                    SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Play_AudioClip_DrawCard_" + type);
                     return;
                 case SE_Table_Index.Turn:
-                    SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Play_AudioClip_Turn");
+                    SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Play_AudioClip_Turn_" + type);
                     return;
                 case SE_Table_Index.Call:
-                    SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Play_AudioClip_Call");
+                    SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Play_AudioClip_Call_" + type);
                     return;
                 case SE_Table_Index.Check:
-                    SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Play_AudioClip_Check");
+                    SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Play_AudioClip_Check_" + type);
                     return;
                 case SE_Table_Index.Raise:
-                    SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Play_AudioClip_Raise");
+                    SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Play_AudioClip_Raise_" + type);
                     return;
             }
         }
@@ -256,7 +271,7 @@ namespace Holdem
         {
             if (!Networking.IsOwner(gameObject))
                 return;
-            SendCustomEventDelayedSeconds("Set_ExitPlayer", 4.0f);
+            SendCustomEventDelayedSeconds("Set_ExitPlayer", 2.0f);
         }
 
         public void Set_ExitPlayer()
@@ -335,7 +350,7 @@ namespace Holdem
 
             if (Get_TablePlayerCount() < 2)
                 return;
-
+            ResetGame();
             tableState = TableState.Hand;
             Set_GameAuto();
             DoSync();
@@ -345,32 +360,7 @@ namespace Holdem
             switch (tableState)
             {
                 case TableState.Wait:
-                    table_BB = 200;
-                    tableCallSize = table_BB;
-                    _tableTotalPot = 0;
-                    for (int i = 0; i < table_Cards.Length; i++)
-                        table_Cards[i] = 52;
-                    table_Card.Reset_Card();
-                    Reset_HandRank();
-
-                    for (int i = 0; i < Get_TablePlayerData.Length; i++)
-                    {
-                        if (Get_TablePlayerData[i].isPlaying()) playerState[i] = PlayerState.Wait;
-                        else                                    playerState[i] = PlayerState.OutOfGame;
-                        playerBetSize[i] = 0;
-                        tableSidePot[i] = 0;
-
-                    }
-
-                    int dealerTurn = Get_TurnIndex(table_DealerIndex + 1);
-                    for (int i = 0; i < Get_TablePlayerData.Length; i++)
-                    {
-                        if (playerState[Get_TurnIndex(dealerTurn + i)] != PlayerState.Wait)
-                            continue;
-
-                        table_DealerIndex = Get_TurnIndex(dealerTurn + i);
-                        break;
-                    }
+                    ResetGame();
                     break;
                 case TableState.Hand:
                     for (int i = 0; i < Get_TablePlayerData.Length; i++)
@@ -435,6 +425,7 @@ namespace Holdem
                                 table_Card.Set_CardRotation(i);
                             }
                         }
+                        Set_HandRank();
                     }
                     Set_TableState(TableState.Wait);
                     obj_turnArrow.transform.position = transform.position + Vector3.down;
@@ -443,6 +434,37 @@ namespace Holdem
             }
             DoSync();
         }
+
+        private void ResetGame()
+        {
+            table_BB = 200;
+            tableCallSize = table_BB;
+            _tableTotalPot = 0;
+            for (int i = 0; i < table_Cards.Length; i++)
+                table_Cards[i] = 52;
+            table_Card.Reset_Card();
+            Reset_HandRank();
+
+            for (int i = 0; i < Get_TablePlayerData.Length; i++)
+            {
+                if (Get_TablePlayerData[i].isPlaying()) playerState[i] = PlayerState.Wait;
+                else playerState[i] = PlayerState.OutOfGame;
+                playerBetSize[i] = 0;
+                tableSidePot[i] = 0;
+
+            }
+
+            int dealerTurn = Get_TurnIndex(table_DealerIndex + 1);
+            for (int i = 0; i < Get_TablePlayerData.Length; i++)
+            {
+                if (playerState[Get_TurnIndex(dealerTurn + i)] != PlayerState.Wait)
+                    continue;
+
+                table_DealerIndex = Get_TurnIndex(dealerTurn + i);
+                break;
+            }
+        }
+
         public bool Get_PlayerInGame(int index) => !(playerState[index] == PlayerState.Fold || playerState[index] == PlayerState.OutOfGame);
         public int Get_TurnIndex(int value) => value % 9;
         public void Set_TurnIndex(int value, bool isExitPlayer = false)
@@ -504,9 +526,11 @@ namespace Holdem
                 p_handSuit[i] = HandSuit.Clover;
             }
         }
+
         private HandRanking Calculate_HandRank(int playerID)
         {
             int index = 0, tableSuit, tableNumber;
+            kiker[playerID] = 0;
 
             int[] pair = new int[13];
             int[] suit = new int[4];
@@ -540,31 +564,11 @@ namespace Holdem
                 }
             }
 
-            int count = 4;
-            for (int i = 0; i < pair[0]; i++)
-            {
-                kiker[playerID] += (int)HandNumber.Ace;
-                count--;
-            }
-            for (int i = pair.Length - 1; i > 1; i--)
-            {
-                if (count == 0)
-                    break;
-
-                for (int j = 0; j < pair[i]; j++)
-                {
-                    kiker[playerID] += pair[i];
-                    count--;
-                }
-            }
-
             if (isRoyalFlush(hand, playerID)) return HandRanking.RoyalFlush;
             if (isStraightFlush(hand, playerID)) return HandRanking.StraightFlush;
             if (isFourOfAKind(pair, playerID)) return HandRanking.FourOfAKind;
             if (isFullHouse(hand, pair, playerID)) return HandRanking.FullHouse;
             if (isFlush(hand, suit, playerID)) return HandRanking.Flush;
-            if (isMountain(hand, pair, playerID)) return HandRanking.Mountain;
-            if (isBackStraight(hand, pair, playerID)) return HandRanking.BackStraight;
             if (isStraight(hand, pair, playerID)) return HandRanking.Straight;
             if (isThreeOfAKind(hand, pair, playerID)) return HandRanking.ThreeOfAKind;
             if (isTwoPair(hand, pair, playerID)) return HandRanking.TwoPair;
@@ -609,7 +613,10 @@ namespace Holdem
                 if (pair[i] == 4)
                 {
                     p_handSuit[playerID] = HandSuit.Spade;
-                    p_handNumber[playerID] = (HandNumber)i;
+                    if (i == 0) p_handNumber[playerID] = HandNumber.Ace;
+                    else p_handNumber[playerID] = (HandNumber)i;
+                    pair[i] = 0;
+                    KikerCheck(1, pair, playerID);
                     return true;
                 }
             return false;
@@ -624,7 +631,20 @@ namespace Holdem
                     if (pair[i] >= 2)
                         count++;
                 if (count >= 2)
+                {
+                    for (int i = pair.Length - 1; i > 0; i--)
+                    {
+                        if (pair[i] >= 2)
+                        {
+                            if (p_handNumber[playerID] != (HandNumber)i)
+                            {
+                                kiker[playerID] = i;
+                                break;
+                            }
+                        }
+                    }
                     return true;
+                }
             }
             return false;
         }
@@ -633,6 +653,7 @@ namespace Holdem
             for (int i = 0; i < suit.Length; i++)
                 if (suit[i] >= 5)
                 {
+                    kiker[playerID] = 0;
                     p_handSuit[playerID] = (HandSuit)i;
                     for (int j = 12; j > 0; j--)
                         if (hand[i * 13 + j] == true)
@@ -640,40 +661,42 @@ namespace Holdem
                             p_handNumber[playerID] = (HandNumber)j;
                             break;
                         }
-                    if (hand[i * 13] == true) p_handNumber[playerID] = HandNumber.Ace;
+
+                    int count = 5;
+
+                    if (hand[i * 13] == true)
+                    {
+                        p_handNumber[playerID] = HandNumber.Ace;
+                        kiker[playerID] += (int)HandNumber.Ace;
+                        count -= 1;
+                    }
+                    for (int j = 12; j > 0; j--)
+                    {
+                        if (count <= 0)
+                            break;
+                        if (hand[i * 13 + j] == true)
+                        {
+                            kiker[playerID] += j;
+                            count -= 1;
+                        }
+                    }
                     return true;
+
                 }
-            return false;
-        }
-        private bool isMountain(bool[] hand, int[] pair, int playerID)
-        {
-            if (pair[0] != 0 && pair[9] != 0 && pair[10] != 0 && pair[11] != 0 && pair[12] != 0)
-            {
-                if (hand[00] == true) p_handSuit[playerID] = HandSuit.Spade;
-                else if (hand[13] == true) p_handSuit[playerID] = HandSuit.Diamond;
-                else if (hand[26] == true) p_handSuit[playerID] = HandSuit.Heart;
-                else if (hand[39] == true) p_handSuit[playerID] = HandSuit.Clover;
-                p_handNumber[playerID] = HandNumber.Ace;
-                return true;
-            }
-            return false;
-        }
-        private bool isBackStraight(bool[] hand, int[] pair, int playerID)
-        {
-            if (pair[0] != 0 && pair[1] != 0 && pair[2] != 0 && pair[3] != 0 && pair[4] != 0)
-            {
-                if (hand[00] == true) p_handSuit[playerID] = HandSuit.Spade;
-                else if (hand[13] == true) p_handSuit[playerID] = HandSuit.Diamond;
-                else if (hand[26] == true) p_handSuit[playerID] = HandSuit.Heart;
-                else if (hand[39] == true) p_handSuit[playerID] = HandSuit.Clover;
-                p_handNumber[playerID] = HandNumber.Ace;
-                return true;
-            }
             return false;
         }
         private bool isStraight(bool[] hand, int[] pair, int playerID)
         {
-            for (int i = 8; i > 0; i--)
+            if (pair[0] != 0 && pair[9] != 0 && pair[10] != 0 && pair[11] != 0 && pair[12] != 0)
+            {
+                if (hand[0] == true) p_handSuit[playerID] = HandSuit.Spade;
+                else if (hand[13] == true) p_handSuit[playerID] = HandSuit.Diamond;
+                else if (hand[26] == true) p_handSuit[playerID] = HandSuit.Heart;
+                else if (hand[39] == true) p_handSuit[playerID] = HandSuit.Clover;
+                p_handNumber[playerID] = HandNumber.Ace;
+                return true;
+            }
+            for (int i = 8; i >= 0; i--)
                 if (pair[i] != 0 && pair[i + 1] != 0 && pair[i + 2] != 0 && pair[i + 3] != 0 && pair[i + 4] != 0)
                 {
                     if (hand[i + 04] == true) p_handSuit[playerID] = HandSuit.Spade;
@@ -693,8 +716,9 @@ namespace Holdem
                 else if (hand[13] == true) p_handSuit[playerID] = HandSuit.Diamond;
                 else if (hand[26] == true) p_handSuit[playerID] = HandSuit.Heart;
                 else if (hand[39] == true) p_handSuit[playerID] = HandSuit.Clover;
-
                 p_handNumber[playerID] = HandNumber.Ace;
+                pair[0] = 0;
+                KikerCheck(2, pair, playerID);
                 return true;
             }
 
@@ -705,8 +729,9 @@ namespace Holdem
                     else if (hand[i + 13] == true) p_handSuit[playerID] = HandSuit.Diamond;
                     else if (hand[i + 26] == true) p_handSuit[playerID] = HandSuit.Heart;
                     else if (hand[i + 39] == true) p_handSuit[playerID] = HandSuit.Clover;
-
                     p_handNumber[playerID] = (HandNumber)i;
+                    pair[i] = 0;
+                    KikerCheck(2, pair, playerID);
                     return true;
                 }
             return false;
@@ -714,60 +739,88 @@ namespace Holdem
         private bool isTwoPair(bool[] hand, int[] pair, int playerID)
         {
             int count = 0;
-            int[] num = new int[3];
 
-            for (int i = 0; i < pair.Length; i++)
+            if (pair[0] == 2)
+            {
+                if (hand[0 + 00] == true) p_handSuit[playerID] = HandSuit.Spade;
+                else if (hand[0 + 13] == true) p_handSuit[playerID] = HandSuit.Diamond;
+                else if (hand[0 + 26] == true) p_handSuit[playerID] = HandSuit.Heart;
+                else if (hand[0 + 39] == true) p_handSuit[playerID] = HandSuit.Clover;
+                p_handNumber[playerID] = HandNumber.Ace;
+                pair[0] = 0;
+                count++;
+            }
+            for (int i = pair.Length - 1; i > 1; i--)
                 if (pair[i] == 2)
                 {
-                    num[count] = i;
+                    if (count == 0)
+                    {
+                        if (hand[i + 00] == true) p_handSuit[playerID] = HandSuit.Spade;
+                        else if (hand[i + 13] == true) p_handSuit[playerID] = HandSuit.Diamond;
+                        else if (hand[i + 26] == true) p_handSuit[playerID] = HandSuit.Heart;
+                        else if (hand[i + 39] == true) p_handSuit[playerID] = HandSuit.Clover;
+                        p_handNumber[playerID] = (HandNumber)i;
+                    }
+                    if (count < 2)
+                        pair[i] = 0;
                     count++;
                 }
             if (count >= 2)
             {
-                if (num[0] == 0)
-                {
-                    if (hand[num[0] + 00] == true) p_handSuit[playerID] = HandSuit.Spade;
-                    else if (hand[num[0] + 13] == true) p_handSuit[playerID] = HandSuit.Diamond;
-                    else if (hand[num[0] + 26] == true) p_handSuit[playerID] = HandSuit.Heart;
-                    else if (hand[num[0] + 39] == true) p_handSuit[playerID] = HandSuit.Clover;
-                    p_handNumber[playerID] = HandNumber.Ace;
-                }
-                else if (num[2] != 0)
-                {
-                    if (hand[num[2] + 00] == true) p_handSuit[playerID] = HandSuit.Spade;
-                    else if (hand[num[2] + 13] == true) p_handSuit[playerID] = HandSuit.Diamond;
-                    else if (hand[num[2] + 26] == true) p_handSuit[playerID] = HandSuit.Heart;
-                    else if (hand[num[2] + 39] == true) p_handSuit[playerID] = HandSuit.Clover;
-                    p_handNumber[playerID] = (HandNumber)num[2];
-                }
-                else
-                {
-                    if (hand[num[1] + 00] == true) p_handSuit[playerID] = HandSuit.Spade;
-                    else if (hand[num[1] + 13] == true) p_handSuit[playerID] = HandSuit.Diamond;
-                    else if (hand[num[1] + 26] == true) p_handSuit[playerID] = HandSuit.Heart;
-                    else if (hand[num[1] + 39] == true) p_handSuit[playerID] = HandSuit.Clover;
-                    p_handNumber[playerID] = (HandNumber)num[1];
-                }
-
+                KikerCheck(1, pair, playerID);
                 return true;
             }
             return false;
         }
         private bool isOnePair(bool[] hand, int[] pair, int playerID)
         {
-            for (int i = 0; i < pair.Length; i++)
+            if (pair[0] == 2)
+            {
+                if (hand[00] == true) p_handSuit[playerID] = HandSuit.Spade;
+                else if (hand[13] == true) p_handSuit[playerID] = HandSuit.Diamond;
+                else if (hand[26] == true) p_handSuit[playerID] = HandSuit.Heart;
+                else if (hand[39] == true) p_handSuit[playerID] = HandSuit.Clover;
+                p_handNumber[playerID] = HandNumber.Ace;
+                pair[0] = 0;
+                KikerCheck(3, pair, playerID);
+                return true;
+            }
+            for (int i = pair.Length - 1; i > 0; i--)
                 if (pair[i] == 2)
                 {
                     if (hand[i + 00] == true) p_handSuit[playerID] = HandSuit.Spade;
                     else if (hand[i + 13] == true) p_handSuit[playerID] = HandSuit.Diamond;
                     else if (hand[i + 26] == true) p_handSuit[playerID] = HandSuit.Heart;
                     else if (hand[i + 39] == true) p_handSuit[playerID] = HandSuit.Clover;
-
-                    if (i == 0) p_handNumber[playerID] = HandNumber.Ace;
-                    else p_handNumber[playerID] = (HandNumber)i;
+                    p_handNumber[playerID] = (HandNumber)i;
+                    pair[i] = 0;
+                    KikerCheck(3, pair, playerID);
                     return true;
                 }
             return false;
+        }
+
+        private void KikerCheck(int count, int[] pair, int playerID)
+        {
+            int rcount = count;
+
+            for (int i = 0; i < pair[0]; i++)
+            {
+                if (rcount <= 0)
+                    return;
+                kiker[playerID] += i;
+            }
+            for (int i = pair.Length - 1; i > 1; i--)
+            {
+                if (rcount <= 0)
+                    return;
+                for (int j = 0; j < pair[i]; j++)
+                {
+                    if (rcount <= 0)
+                        return;
+                    kiker[playerID] += i;
+                }
+            }
         }
         #endregion
         #region GameSet
@@ -791,22 +844,7 @@ namespace Holdem
                 if (!Get_PlayerInGame(i))
                     hands[i] = 0;
                 else
-                {
-                    switch(p_handRank[i])
-                    {
-                        case HandRanking.Mountain:
-                        case HandRanking.Straight:
-                        case HandRanking.BackStraight:
-                        case HandRanking.StraightFlush:
-                        case HandRanking.RoyalFlush:
-                        case HandRanking.Flush:
-                            kiker[i] = 0;
-                            break;
-                    }
-
                     hands[i] = (int)p_handRank[i] * 10000 + (int)p_handNumber[i] * 100 + kiker[i];
-                }
-                table_System_UI.Set_PlayerRank("", i);
             }
             KikerCheck();
         }
@@ -918,9 +956,21 @@ namespace Holdem
         }
         #endregion
         #region GiveChip
-        public void Add_Chip_P1()
-        {
+        public void Add_Chip_P1() => Add_Chip_Player(0);
+        public void Add_Chip_P2() => Add_Chip_Player(1);
+        public void Add_Chip_P3() => Add_Chip_Player(2);
+        public void Add_Chip_P4() => Add_Chip_Player(3);
+        public void Add_Chip_P5() => Add_Chip_Player(4);
+        public void Add_Chip_P6() => Add_Chip_Player(5);
+        public void Add_Chip_P7() => Add_Chip_Player(6);
+        public void Add_Chip_P8() => Add_Chip_Player(7);
+        public void Add_Chip_P9() => Add_Chip_Player(8);
 
+        public void Add_Chip_Player(int index)
+        {
+            if (!table_Players[index].isPlaying())
+                return;
+            table_Players[index].SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Add_Chip");
         }
         #endregion
 

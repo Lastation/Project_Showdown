@@ -18,6 +18,10 @@ public class Instance_Data : UdonSharpBehaviour
     [UdonSynced]
     private int[] iCoins = new int[100];
 
+    public string get_sDisplayNames(int index) => sDisplayNames[index];
+    public int get_iChips(int index) => iChips[index];
+    public int get_iCoins(int index) => iCoins[index];
+
     private bool loadData = true;
 
     void Start()
@@ -40,8 +44,8 @@ public class Instance_Data : UdonSharpBehaviour
             if (sDisplayNames[i] == "")
             {
                 sDisplayNames[i] = player.displayName;
-                iChips[i] = 0;
-                iCoins[i] = 40;
+                iChips[i] = 20000;
+                iCoins[i] = 0;
                 break;
             }
         }
@@ -108,8 +112,8 @@ public class Instance_Data : UdonSharpBehaviour
             }
         }
 
-        data_Player.Set_Chip(0);
-        data_Player.Set_Coin(40);
+        data_Player.Set_Chip(20000);
+        data_Player.Set_Coin(0);
     }
     #endregion
 }

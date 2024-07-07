@@ -7,6 +7,5 @@ namespace UCS
 	{
 		public int chips = 0;
 		public int coin = 0;
-		public string format = "$ {0:F0}";
 	}
 }

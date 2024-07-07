@@ -4,7 +4,7 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
 
-[UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
+[UdonBehaviourSyncMode(BehaviourSyncMode.None)]
 public class UdonChipsRanking : UdonSharpBehaviour
 {
     [SerializeField] private float UpdateSpan = 3f;
@@ -14,15 +14,12 @@ public class UdonChipsRanking : UdonSharpBehaviour
     [SerializeField] private Color silverColor = new Color(192f/255f, 192f/255f, 192f/255f, 1f);
     [SerializeField] private Color copperColor = new Color(184f/255f, 115f/255f, 51f/255f, 1f);
     [SerializeField] private Color otherColor = new Color(100f/255f, 100f/255f, 100f/255f, 1f);
-    float nextTime = 0;
-    [SerializeField] UdonChipsRankingPlayer[] players;
     [SerializeField] Instance_Data instance_Data;
+    [SerializeField] UdonChipsRankingPlayer[] players;
+    float nextTime = 0;
     private int myPlayerId = 0;
     private bool isStarted = false;
-    void Start()
-    {
-        
-    }
+
     void Update()
     {
         if(!gameObject.activeSelf) return;
@@ -31,8 +28,6 @@ public class UdonChipsRanking : UdonSharpBehaviour
         if(nextTime == 0f || Time.time >= nextTime)
         {
             nextTime = Time.time + UpdateSpan;
-            players[myPlayerId].SetUdonChips();
-            RemoveBlank();
             if(isRanking == true){
                 SortPlayers();
             }
@@ -40,30 +35,24 @@ public class UdonChipsRanking : UdonSharpBehaviour
     }
     public void SortPlayers()
     {
-        int playerCount = VRCPlayerApi.GetPlayerCount();
-        VRCPlayerApi[] nowPlayers = new VRCPlayerApi[players.Length];
-        int[] playersID = new int[playerCount];
-        float[] playersUC = new float[playerCount];
-        int[] playersCoin = new int[playerCount];
-        VRCPlayerApi.GetPlayers(nowPlayers);
-        int cnt = 0;
-        for(int i = 0;i < nowPlayers.Length;i++){
-            if(Utilities.IsValid(nowPlayers[i]) == false){
-                //playersID[i] = -1;
-                //playersUC[i] = 0;
-                continue;
-            }
-            playersID[cnt] = nowPlayers[cnt].playerId;
-            playersUC[cnt] = players[playersID[cnt]].PlayerUdonChips;
-            playersCoin[cnt] = players[playersID[cnt]].PlayerUdonCoins;
-            cnt++;
+        string[] playersID = new string[100];
+        float[] playersUC = new float[100];
+        int[] playersCoin = new int[100];
+        for (int i = 0; i < 100; i++)
+        {
+            playersID[i] = instance_Data.get_sDisplayNames(i);
+            playersUC[i] = instance_Data.get_iChips(i);
+            playersCoin[i] = instance_Data.get_iCoins(i);
         }
-        int tmpID;
+        string tmpID;
         float tmpUC;
         int tmpCoin;
-        for(int i = 0;i < playerCount - 1;i++){
-            for(int j = playerCount - 1;j > i;j--){
-                if(playersCoin[j] < playersCoin[j-1]){
+        for (int i = 0; i < 99; i++)
+        {
+            for (int j = 99; j > i; j--)
+            {
+                if (playersCoin[j] < playersCoin[j - 1])
+                {
                     tmpID = playersID[j];
                     tmpUC = playersUC[j];
                     tmpCoin = playersCoin[j];
@@ -76,69 +65,16 @@ public class UdonChipsRanking : UdonSharpBehaviour
                 }
             }
         }
-        for(int i = 0;i < playerCount;i++){
-            if(playersID[i] < 0) continue;
-            players[playersID[i]].gameObject.transform.SetAsFirstSibling();
-            if(changingColor == true){
-                if(i == playerCount - 1){
-                    players[playersID[i]].ChangeColor(goldColor, playerCount - i);
-                } else if(i == playerCount - 2){
-                    players[playersID[i]].ChangeColor(silverColor, playerCount - i);
-                } else if(i == playerCount - 3){
-                    players[playersID[i]].ChangeColor(copperColor, playerCount - i);
-                } else {
-                    players[playersID[i]].ChangeColor(otherColor, playerCount - i);
-                }
-            }
-        }
-    }
-    public void RemoveBlank()
-    {
         for (int i = 0; i < players.Length; i++)
         {
-            players[i].gameObject.transform.SetAsLastSibling();
-        }
-        foreach (var player in players)
-        {
-            if (player.PlayerName == "")
+            if (playersID[i] == "") continue;
+            players[i].gameObject.transform.SetAsFirstSibling();
+            if (changingColor == true)
             {
-                player.gameObject.transform.SetAsLastSibling();
-                if (changingColor == true) player.ChangeColor(otherColor);
-            }
-        }
-    }
-    public override void OnPlayerJoined(VRCPlayerApi player)
-    {
-        if (player == Networking.LocalPlayer)
-        {
-            myPlayerId = Networking.LocalPlayer.playerId;
-            players[myPlayerId].SetPlayer();
-            players[myPlayerId].SetUdonChips();
-            isStarted = true;
-        }
-        UpdatePlayerName();
-    }
-    public override void OnPlayerLeft(VRCPlayerApi player)
-    {
-        if (Networking.IsOwner(instance_Data.gameObject))
-            instance_Data.Save_PlayerData(player.displayName, players[player.playerId].PlayerUdonChips, players[player.playerId].PlayerUdonCoins);
-
-        if (player == Networking.LocalPlayer)
-            players[myPlayerId].ResetUdonChips();
-        UpdatePlayerName();
-    }
-    public void UpdatePlayerName()
-    {
-        for (int i = 0; i < players.Length; i++)
-        {
-            var player = VRCPlayerApi.GetPlayerById(i);
-            if (player == null)
-            {
-                players[i].PlayerName = "";
-            }
-            else
-            {
-                players[i].PlayerName = player.displayName;
+                if (i == 0)         players[i].ChangeColor(goldColor, i + 1);
+                else if (i == 1)    players[i].ChangeColor(silverColor, i + 1);
+                else if (i == 2)    players[i].ChangeColor(copperColor, i + 1);
+                else                players[i].ChangeColor(otherColor, i + 1);
             }
         }
     }

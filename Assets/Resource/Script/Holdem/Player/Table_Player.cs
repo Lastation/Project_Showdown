@@ -26,6 +26,7 @@ namespace Holdem
         [UdonSynced] int tablePlayerChip;
         [UdonSynced] bool isAction;
         [UdonSynced] int betSize = 0;
+        [UdonSynced] SE_Table_Type voiceType = SE_Table_Type.Basic;
 
         TableState tableState = TableState.Wait;
         bool isTurn = false;
@@ -110,8 +111,6 @@ namespace Holdem
                     result = 3;
                     break;
                 case HandRanking.Straight:
-                case HandRanking.BackStraight:
-                case HandRanking.Mountain:
                     result = 5;
                     break;
                 case HandRanking.Flush:
@@ -187,6 +186,7 @@ namespace Holdem
             isTurn = true;
             fTurnTimer = 0;
             isAction = false;
+            voiceType = table_System._mainSystem.Get_VoiceType();
             table_Player_UI.Set_Button_Color(isTurn);
             if (table_System._mainSystem.Get_Data_Player().Get_Chip() <= table_System.Get_TableCallSize() - betSize)
                 table_Player_UI.Set_CallText_Allin(table_System._mainSystem.Get_Data_Player().Get_Chip());
@@ -303,10 +303,19 @@ namespace Holdem
         }
         #endregion
 
+        public void Add_Chip()
+        {
+            if (!Networking.IsOwner(gameObject)) return;
+
+            table_System._mainSystem.Get_Data_Player().Add_Coin(10);
+        }
+
         public bool isPlaying() => displayName == "" ? false : true;
         public Table_Player_UI Get_table_Player_UI() => table_Player_UI;
         public string Get_DisplayName() => displayName;
         public int Get_TablePlayerChip() => tablePlayerChip;
+
+        public SE_Table_Type Get_VoiceType() => voiceType;
 
         public Transform[] Get_CardPosition => tf_cardPosition;
         public Transform Get_DealerButtonPosition => tf_dealerButtonPosition;

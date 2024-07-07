@@ -2,6 +2,7 @@
 using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.UI;
+using VRC.SDKBase;
 namespace Holdem
 {
     public enum handMenuIndex : int
@@ -46,19 +47,54 @@ namespace Holdem
         private LocalizationType localizationType = LocalizationType.KOR;
         int localizationIndex;
 
+        public void Set_Language_KOR()
+        {
+            localizationIndex = (int)LocalizationType.KOR;
+            Update_Language((LocalizationType)localizationIndex);
+        }
+        public void Set_Language_JP()
+        {
+            localizationIndex = (int)LocalizationType.JP;
+            Update_Language((LocalizationType)localizationIndex);
+        }
+        public void Set_Language_ENG()
+        {
+            localizationIndex = (int)LocalizationType.ENG;
+            Update_Language((LocalizationType)localizationIndex);
+        }
+
         public void Set_Language()
         {
             localizationIndex = localizationIndex + 1 >= (int)LocalizationType.Length ? 0 : localizationIndex + 1;
             Update_Language((LocalizationType)localizationIndex);
         }
         public LocalizationType Get_Language => localizationType;
+        public Toggle[] languageToggle;
 
-        public AudioClip Get_Table_Audio(SE_Table_Type type, SE_Table_Index index)
+        private void Start()
         {
-            return null;
+            switch (VRCPlayerApi.GetCurrentLanguage())
+            {
+                case "en":
+                    Update_Language(LocalizationType.ENG);
+                    languageToggle[0].isOn = true;
+                    break;
+                case "ja":
+                case "ja-JP":
+                    Update_Language(LocalizationType.JP);
+                    languageToggle[1].isOn = true;
+                    break;
+                case "ko":
+                case "ko-KR":
+                    Update_Language(LocalizationType.KOR);
+                    languageToggle[2].isOn = true;
+                    break;
+                default:
+                    Update_Language(LocalizationType.ENG);
+                    languageToggle[0].isOn = true;
+                    break;
+            }
         }
-
-        private void Start() => Update_Language(LocalizationType.KOR);
 
         public void Update_Language(LocalizationType type)
         {
@@ -184,7 +220,37 @@ namespace Holdem
         #region Sound Effect
         [SerializeField]
         AudioClip[] audioClip_Table;
-        public AudioClip Get_AudioClip_Table(SE_Table_Index index) => audioClip_Table[(int)index];
+        [SerializeField]
+        AudioClip[] audioClip_Table_Type1;
+        [SerializeField]
+        AudioSource audioSource_Test;
+
+        SE_Table_Type voiceType = SE_Table_Type.Basic;
+        public SE_Table_Type Get_VoiceType() => voiceType;
+        public void Set_VoiceType_Basic() => Set_VoiceType(SE_Table_Type.Basic);
+        public void Set_VoiceType_Type1() => Set_VoiceType(SE_Table_Type.Type1);
+
+        public void Set_VoiceType(SE_Table_Type type)
+        {
+            voiceType = type;
+            switch(type)
+            {
+                case SE_Table_Type.Basic:
+                    audioSource_Test.clip = Get_AudioClip_Table_Basic(SE_Table_Index.Call);
+                    break;
+                case SE_Table_Type.Type1:
+                    audioSource_Test.clip = Get_AudioClip_Table_Type1(SE_Table_Index.Call);
+                    break;
+            }
+            audioSource_Test.Play();
+        }
+        public AudioClip Get_AudioClip_Table_Basic(SE_Table_Index index) => audioClip_Table[(int)index];
+        public AudioClip Get_AudioClip_Table_Type1(SE_Table_Index index)
+        {
+            if (audioClip_Table_Type1[(int)index] != null)
+                return audioClip_Table_Type1[(int)index];
+            return audioClip_Table[(int)index];
+        }
         #endregion
 
         #region Card Sprite
@@ -257,8 +323,5 @@ namespace Holdem
 
         public void Set_RainShader_OFF() => rainShader.SetFloat("_Stop", 0);
         public void Set_RainShader_ON() => rainShader.SetFloat("_Stop", 1);
-
-        [SerializeField]
-        AnimationCurve ScoreCurve;
     }
 }
